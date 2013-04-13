@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\testApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.cpp">
+      <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.cpp">
+      <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{71834f65-f3a9-211e-73b8-dc8563776aec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxOpenNI.git">
+      <UniqueIdentifier>{1ee569f3-0e88-7387-14cf-615f683712b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxOpenNI.git\src">
+      <UniqueIdentifier>{a268bfca-2b55-8aeb-3387-28cc8ddb380f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OPENNI">
+      <UniqueIdentifier>{09173627-be52-4512-861d-fe8b5da0f6fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\testApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.h">
+      <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.h">
+      <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNIUtils.h">
+      <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
