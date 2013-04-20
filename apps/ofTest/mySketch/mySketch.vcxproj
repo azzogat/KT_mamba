@@ -47,8 +47,8 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)_debug</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)</TargetName>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\nite;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni\Win32;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\OpenNI2\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\nite;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni\Win32;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni;C:\Program Files %28x86%29\OpenNI\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\OpenNI2\Lib;$(SolutionDir)../../../libs\openNI;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\nite;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni\Win32;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\OpenNI2\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -62,6 +62,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxOpenNI.git\libs;..\..\..\addons\ofxOpenNI.git\src</AdditionalIncludeDirectories>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
@@ -103,11 +104,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\testApp.cpp" />
     <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.cpp" />
     <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Terrain.h" />
     <ClInclude Include="src\testApp.h" />
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.h" />
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.h" />
