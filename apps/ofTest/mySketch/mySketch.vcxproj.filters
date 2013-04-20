@@ -13,6 +13,12 @@
     <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.cpp">
       <Filter>addons\ofxOpenNI.git\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Terrain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\KTGui.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -43,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNIUtils.h">
       <Filter>addons\ofxOpenNI.git\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Terrain.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\KTGui.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

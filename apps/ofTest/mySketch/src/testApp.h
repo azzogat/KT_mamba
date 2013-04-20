@@ -3,11 +3,14 @@
 
 #include "ofxOpenNI.h"
 #include "ofMain.h"
+#include "Terrain.h"
+#include "KTGui.h"
 
 #define MAX_DEVICES 2
 
 class testApp : public ofBaseApp{
 
+	KTGui	m_gui;
 public:
     
 	void setup();
@@ -26,16 +29,16 @@ public:
 private:
     
     void handEvent(ofxOpenNIGestureEvent & event);
-    
-	  ofxOpenNI openNIDevice;
+
+    Terrain* terrain;
+  	ofxOpenNI openNIDevice;
+
     ofTrueTypeFont verdana;
 
     ofxOpenNIHand * hands[2];
     
-    float y, y_norm;
-    int MAX_HANDS;
-    int MAX_CHANGE;
-    int x, z, y_change;
+    float x, y, z, x_norm, y_norm, z_norm, y_change, dead_range, live_margin, radius;
+    int MAX_HANDS, MAX_CHANGE, DIM_X, DIM_Y, DIM_X_CORRECTED, DIM_Y_CORRECTED, LEFT_MARGIN, RIGHT_MARGIN, TOP_MARGIN, BOTTOM_MARGIN;
 };
 
 #endif
