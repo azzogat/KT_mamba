@@ -172,7 +172,7 @@ void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
         float d = vecToPoint.length();
 
         if (d < radiusInFiled) {
-          float normD = (1.0f-(d/radiusInFiled));
+          float normD = (1.0f-(d/radiusInFiled))*0.5f;
 
           float finalDiff = sinf(normD)*diff;
           m_heightField.values[i][j] += finalDiff;
