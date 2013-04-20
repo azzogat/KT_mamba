@@ -13,7 +13,7 @@ public:
 	void setup();
 	void update();
 	void draw();
-    void exit();
+  void exit();
     
 	void keyPressed  (int key);
 	void keyReleased(int key);
@@ -27,9 +27,15 @@ private:
     
     void handEvent(ofxOpenNIGestureEvent & event);
     
-	ofxOpenNI openNIDevice;
+	  ofxOpenNI openNIDevice;
     ofTrueTypeFont verdana;
+
+    ofxOpenNIHand * hands[2];
     
+    float y, y_norm;
+    int MAX_HANDS;
+    int MAX_CHANGE;
+    int x, z, y_change;
 };
 
 #endif
