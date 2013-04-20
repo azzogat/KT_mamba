@@ -16,6 +16,9 @@
     <ClCompile Include="src\Terrain.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\KTGui.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -48,6 +51,9 @@
       <Filter>addons\ofxOpenNI.git\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Terrain.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\KTGui.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

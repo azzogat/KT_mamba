@@ -103,6 +103,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\KTGui.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\testApp.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\KTGui.h" />
     <ClInclude Include="src\Terrain.h" />
     <ClInclude Include="src\testApp.h" />
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.h" />
