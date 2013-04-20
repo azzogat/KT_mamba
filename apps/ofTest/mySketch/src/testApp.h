@@ -4,11 +4,13 @@
 #include "ofxOpenNI.h"
 #include "ofMain.h"
 #include "Terrain.h"
+#include "KTGui.h"
 
 #define MAX_DEVICES 2
 
 class testApp : public ofBaseApp{
 
+	KTGui	m_gui;
 public:
     
 	void setup();
