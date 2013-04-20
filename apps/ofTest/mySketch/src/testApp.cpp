@@ -28,16 +28,17 @@ void testApp::setup() {
     // or you can add them one at a time
     //vector<string> gestureNames = openNIDevice.getAvailableGestures(); // you can use this to get a list of gestures
                                                                          // prints to console and/or you can use the returned vector
-	openNIDevice.addGesture("Click");
+  openNIDevice.addGesture("Click");
   openNIDevice.setMaxNumHands(4);
     
-	ofAddListener(openNIDevice.gestureEvent,this,&testApp::handEvent); 
+  ofAddListener(openNIDevice.gestureEvent,this,&testApp::handEvent); 
 
   openNIDevice.start();
 
   verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
 
   terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
+  
 }
 
 //--------------------------------------------------------------
@@ -73,11 +74,10 @@ void testApp::draw(){
  //       ofSetColor(255,0,0);
  //       ofRect(handPosition.x, handPosition.y, 10, 10);
  //   }
-
     glMatrixMode(GL_PROJECTION);
-
+	
     glLoadIdentity();
-    gluPerspective(60,4.0/3.0,1,1000);
+    gluPerspective(60,ofGetWidth()/ofGetHeight(),1,1000);
 
 
     glMatrixMode(GL_MODELVIEW);
@@ -86,8 +86,17 @@ void testApp::draw(){
     glPushMatrix();
         terrain->Draw();
     glPopMatrix();
+	    
+	// GUI CRAP
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, ofGetWidth(), ofGetHeight(), 0, -ofGetHeight(), ofGetHeight());
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
-
+	glPushMatrix();
+		m_gui.Draw();
+	glPopMatrix();
     //ofPopMatrix();
     
     // draw some info regarding frame counts etc
@@ -101,7 +110,7 @@ void testApp::draw(){
 void testApp::handEvent(ofxOpenNIGestureEvent & event){
     // show hand event messages in the console
 	if(event.gestureName == "Wave")
-    ofLogNotice() << event.gestureName << "for hand" << event.gestureName << "from device" << event.deviceID;
+		ofLogNotice() << event.gestureName << "for hand" << event.gestureName << "from device" << event.deviceID;
 }
 
 //--------------------------------------------------------------
@@ -124,6 +133,21 @@ void testApp::keyReleased(int key){
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
 
+	// check what the point is over
+	KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(x,y));
+	if(pressed != KT_NONE)
+	{
+		printf("Point over button \n");
+		switch( pressed )
+		{
+			case KT_RAISE:
+				// raise terrain
+			break;
+			case KT_LOWER:
+				// lower terrain
+			break;
+		}
+	}
 }
 
 //--------------------------------------------------------------
