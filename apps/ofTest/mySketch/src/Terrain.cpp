@@ -145,8 +145,6 @@ void Terrain::RecalculateTerrain() {
       float color = pos.y/10;
 
       colorBuffer[(z * m_heightField.xDim)+x] = ofFloatColor(color,color,color);
-
-
     }
   }
 
