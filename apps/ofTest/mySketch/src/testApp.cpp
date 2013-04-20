@@ -79,9 +79,10 @@ void testApp::draw(){
     glLoadIdentity();
     gluPerspective(60,4.0/3.0,1,1000);
 
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0,10,10,0,0,0,0,1,0);
+    gluLookAt(0,20,20,0,0,0,0,1,0);
     glPushMatrix();
         terrain->Draw();
     glPopMatrix();
@@ -110,7 +111,9 @@ void testApp::exit(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-
+  if (key == 98) {
+    terrain->AdjustHeight(0.5f,0.5f,0.5f,0.1f);
+  }
 }
 
 //--------------------------------------------------------------

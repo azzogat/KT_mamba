@@ -15,9 +15,10 @@ public:
   static Terrain* Create(float width,float depth,int numHorizontalVerts,int numVerticalVerts, ofVec3f centre);
   void Update();
   void Draw();
+  void AdjustHeight(float diff,float x,float z,float radius);
   ~Terrain();
 private:
-  Terrain(){}
+  Terrain():isDirty(false){}
 
   void RecalculateTerrain();
   HeightField m_heightField;
@@ -27,8 +28,9 @@ private:
   std::vector<ofVec3f> posBuffer;
   std::vector<ofVec3f> normalBuffer;
   std::vector<ofVec2f> uvBuffer;
-
+  std::vector<ofFloatColor> colorBuffer;
   float planeWidth;
   float planeDepth;
+  bool isDirty;
 };
 #endif // Terrain_h__

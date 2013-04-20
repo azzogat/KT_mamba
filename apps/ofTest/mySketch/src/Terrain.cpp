@@ -95,6 +95,7 @@ Terrain* Terrain::Create(float width,float depth,int numHorizontalVerts,int numV
       tmp->posBuffer.push_back(ofVec3f(posX,centre.y,posZ));
       tmp->normalBuffer.push_back(ofVec3f(0,1,0));
       tmp->uvBuffer.push_back(ofVec2f(x,z));
+      tmp->colorBuffer.push_back(ofFloatColor(0,0,0));
     }
   }
 
@@ -102,7 +103,7 @@ Terrain* Terrain::Create(float width,float depth,int numHorizontalVerts,int numV
   tmp->m_meshVbo.setVertexData(&tmp->posBuffer[0],tmp->posBuffer.size(),GL_DYNAMIC_DRAW);
   tmp->m_meshVbo.setNormalData(&tmp->normalBuffer[0],tmp->normalBuffer.size(),GL_DYNAMIC_DRAW);
   tmp->m_meshVbo.setTexCoordData(&tmp->uvBuffer[0],tmp->uvBuffer.size(),GL_STATIC_DRAW);
-
+  tmp->m_meshVbo.setColorData(&tmp->colorBuffer[0],tmp->colorBuffer.size(),GL_DYNAMIC_DRAW);
   return tmp;
 }
 
@@ -115,7 +116,10 @@ Terrain::~Terrain() {
 
 
 void Terrain::Update() {
-  RecalculateTerrain();
+  if (isDirty) {
+      RecalculateTerrain();
+  }
+
 }
 
 void Terrain::Draw() {
@@ -126,19 +130,56 @@ void Terrain::RecalculateTerrain() {
   float u = 0;
   float v = 0;
 
-  for (float z = 0; z < m_heightField.zDim; ++z) {
-    for (float x = 0; x < m_heightField.xDim; ++x) {
+  for (int z = 0; z < m_heightField.zDim; ++z) {
+    for (int x = 0; x < m_heightField.xDim; ++x) {
 
       ofVec3f pos = posBuffer[(z * m_heightField.xDim)+x];
-      u = pos.x / planeWidth;
-      v = pos.z / planeDepth;
+
+      u = (float)x / (float)m_heightField.xDim;
+      v = (float)z / (float)m_heightField.zDim;
+
       pos.y = SampleHeightField(m_heightField,u,v);
 
       posBuffer[(z * m_heightField.xDim)+x] = pos;
 
-      //tmp->normalBuffer.push_back(ofVec3f(0,1,0));
+      float color = pos.y/10;
+
+      colorBuffer[(z * m_heightField.xDim)+x] = ofFloatColor(color,color,color);
+
+
     }
   }
 
   m_meshVbo.updateVertexData(&posBuffer[0],posBuffer.size());
+  m_meshVbo.updateColorData(&colorBuffer[0],colorBuffer.size());
+
+  isDirty = false;
+}
+
+void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
+  if (diff != 0) {
+    isDirty = true;
+    int centerX = x*(m_heightField.xDim-1);
+    int centerZ = z*(m_heightField.zDim-1);
+
+
+    float radiusInFiled = m_heightField.xDim * radius;
+    ofVec2f vecToPoint;
+    ofVec2f centre(centerX,centerZ);
+
+    for (int i = 0; i < m_heightField.xDim; ++i) {
+      for (int j = 0; j < m_heightField.zDim; ++j) {
+
+        vecToPoint = centre - ofVec2f(i,j);
+        float d = vecToPoint.length();
+
+        if (d < radiusInFiled) {
+          float normD = (1.0f-(d/radiusInFiled));
+
+          float finalDiff = sinf(normD)*diff;
+          m_heightField.values[i][j] += finalDiff;
+       }
+      }
+    }
+  }
 }
