@@ -1,77 +1,99 @@
 #include "testApp.h"
+#include "GL\glew.h"
 
 //--------------------------------------------------------------
 void testApp::setup() {
     
-    ofSetLogLevel(OF_LOG_VERBOSE);
 
-    openNIDevice.setup();
-    openNIDevice.addImageGenerator();
-    openNIDevice.addDepthGenerator();
-    openNIDevice.setRegister(true);
-    openNIDevice.setMirror(true);
+  ofSetLogLevel(OF_LOG_VERBOSE);
+
+  glewInit();
+
+  if (!glewIsSupported("GL_VERSION_2_0")) {
+    float test = 5;
+  }
+    
+  openNIDevice.setup();
+  openNIDevice.addImageGenerator();
+  openNIDevice.addDepthGenerator();
+  openNIDevice.setRegister(true);
+  openNIDevice.setMirror(true);
     
     // setup the hand generator
-    openNIDevice.addHandsGenerator();
-    openNIDevice.addGestureGenerator();
+  openNIDevice.addHandsGenerator();
+  openNIDevice.addGestureGenerator();
     // add all focus gestures (ie., wave, click, raise arm)
 	openNIDevice.addAllHandFocusGestures();
     
     // or you can add them one at a time
     //vector<string> gestureNames = openNIDevice.getAvailableGestures(); // you can use this to get a list of gestures
                                                                          // prints to console and/or you can use the returned vector
-
 	openNIDevice.addGesture("Click");
-    openNIDevice.setMaxNumHands(4);
+  openNIDevice.setMaxNumHands(4);
     
 	ofAddListener(openNIDevice.gestureEvent,this,&testApp::handEvent); 
 
-    openNIDevice.start();
-    
-    
-    
-    verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
+  openNIDevice.start();
+
+  verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
+
+  terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
     openNIDevice.update();
+    terrain->Update();
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	ofSetColor(255, 255, 255);
-    
-    ofPushMatrix();
-    // draw debug (ie., image, depth, skeleton)
-    openNIDevice.drawDebug();
-    ofPopMatrix();
-    
-    ofPushMatrix();
-    // get number of current hands
-    int numHands = openNIDevice.getNumTrackedHands();
-    
-    // iterate through users
-    for (int i = 0; i < numHands; i++){
-        
-        // get a reference to this user
-        ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
-        
-        // get hand position
-        ofPoint & handPosition = hand.getPosition();
-        // do something with the positions like:
-        
-        // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
-        ofSetColor(255,0,0);
-        ofRect(handPosition.x, handPosition.y, 10, 10);
-    }
-    ofPopMatrix();
+	//ofSetColor(255, 255, 255);
+ //   
+ //   ofPushMatrix();
+ //   // draw debug (ie., image, depth, skeleton)
+ //   //openNIDevice.drawDebug();
+ //   ofPopMatrix();
+ //   
+ //   ofPushMatrix();
+ //   // get number of current hands
+ //   int numHands = openNIDevice.getNumTrackedHands();
+ //   
+ //   // iterate through users
+ //   for (int i = 0; i < numHands; i++){
+ //       
+ //       // get a reference to this user
+ //       ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
+ //       
+ //       // get hand position
+ //       ofPoint & handPosition = hand.getPosition();
+ //       // do something with the positions like:
+ //       
+ //       // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
+ //       ofSetColor(255,0,0);
+ //       ofRect(handPosition.x, handPosition.y, 10, 10);
+ //   }
+
+    glMatrixMode(GL_PROJECTION);
+
+    glLoadIdentity();
+    gluPerspective(60,4.0/3.0,1,1000);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0,10,10,0,0,0,0,1,0);
+    glPushMatrix();
+        terrain->Draw();
+    glPopMatrix();
+
+
+    //ofPopMatrix();
     
     // draw some info regarding frame counts etc
-	ofSetColor(0, 255, 0);
-	string msg = " MILLIS: " + ofToString(ofGetElapsedTimeMillis()) + " FPS: " + ofToString(ofGetFrameRate()) + " Device FPS: " + ofToString(openNIDevice.getFrameRate());
+	//ofSetColor(0, 255, 0);
+	//string msg = " MILLIS: " + ofToString(ofGetElapsedTimeMillis()) + " FPS: " + ofToString(ofGetFrameRate()) + " Device FPS: " + ofToString(openNIDevice.getFrameRate());
     
-	verdana.drawString(msg, 20, openNIDevice.getNumDevices() * 480 - 20);
+	//verdana.drawString(msg, 20, openNIDevice.getNumDevices() * 480 - 20);
 }
 
 //--------------------------------------------------------------

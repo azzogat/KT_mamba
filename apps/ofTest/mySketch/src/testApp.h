@@ -3,6 +3,7 @@
 
 #include "ofxOpenNI.h"
 #include "ofMain.h"
+#include "Terrain.h"
 
 #define MAX_DEVICES 2
 
@@ -13,7 +14,7 @@ public:
 	void setup();
 	void update();
 	void draw();
-    void exit();
+  void exit();
     
 	void keyPressed  (int key);
 	void keyReleased(int key);
@@ -26,7 +27,7 @@ public:
 private:
     
     void handEvent(ofxOpenNIGestureEvent & event);
-    
+    Terrain* terrain;
 	ofxOpenNI openNIDevice;
     ofTrueTypeFont verdana;
     
