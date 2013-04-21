@@ -1,6 +1,6 @@
-apps/devApps/*
-apps/ofTest/mySketch/obj/*
-libs/*
+/apps/devApps/
+/apps/ofTest/mySketch/obj/
+/libs/
 *.sdf
 *.opensdf
 *.pdb
