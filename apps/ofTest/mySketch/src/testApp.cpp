@@ -5,22 +5,28 @@
 void testApp::setup() {
   
   MAX_HANDS = 2;
-  MAX_CHANGE = 8;
-  DIM_X = ofGetWidth();
-  DIM_Y = ofGetHeight();
-  TOP_MARGIN = 60;  // using margins to correct apparent sensor inaccuracy
-  RIGHT_MARGIN = 40;
-  LEFT_MARGIN = 50;
-  BOTTOM_MARGIN = 10;
-  DIM_X_CORRECTED = DIM_X - LEFT_MARGIN - RIGHT_MARGIN;
-  DIM_Y_CORRECTED = DIM_Y - TOP_MARGIN - BOTTOM_MARGIN;
+  MAX_CHANGE = 2;
 
-  dead_range = 0.2f; // dead zone for input
-  live_margin = (1.0f - dead_range) * 0.5f;
+  // using margins to correct apparent sensor inaccuracy (could be unique to device)
+  // sensor doesn't go lower than ~50 nor higher than ~620 in x
+  // sensor doesn't go lower than ~60 nor higher than ~470 in y
+  margin[0] = 0.125f;       // top
+  margin[1] = 0.03125f;     // right
+  margin[2] = 0.02083333f;  // bottom
+  margin[3] = 0.078125f;    // left
+
+  ofWidth = ofGetWidth();
+  ofHeight = ofGetHeight();
+  xDimension = 1.0f - margin[3] - margin[1];
+  yDimension = 1.0f - margin[0] - margin[2];
+
   radius = 0.2f;
+  deadZone = 0.2f; // dead zone for input
+  liveLower = (1.0f - deadZone) * 0.5f;
+  liveUpper = (1.0f + deadZone) * 0.5f;
 
   // init with 0
-  x = y = z = x_norm = y_norm = z_norm = y_change = 0;
+  x = y = z = yChange = 0;
   // ..and NULL
   for (int i = 0; i < MAX_HANDS; i++) {
     hands[i] = NULL;
@@ -57,7 +63,6 @@ void testApp::setup() {
 
   // or you can add them one at a time
   // Wave Click RaiseHand MovingHand
-  //openNIDevice.addGesture("Click");
   //openNIDevice.addGesture("Wave");
 
   openNIDevice.setMaxNumHands(MAX_HANDS);
@@ -77,10 +82,14 @@ void testApp::setup() {
 void testApp::update(){
   openNIDevice.update();
 
-  int num_hands = openNIDevice.getNumTrackedHands();
+  // NOTE:
+  // openNIDevice.getNumTrackedHands() often returns a number greater
+  // than actual hands in the array of hands OpenNI is tracking...
+  // ... this £@!#$ up on getTrackeHand(messed_up_index) ...
+
   // get tracked hands and stuff them into our array
   for (int i = 0; i < MAX_HANDS; i++) {
-    if (i < num_hands) {
+    if (i < openNIDevice.getNumTrackedHands()) {
       ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
       hands[i] = & hand;
     } else {
@@ -91,9 +100,9 @@ void testApp::update(){
   // hand 0 will be position. it's the one on the right
   // hand 1 will be for height.. it's the other one
 
-  // if we have both hands, sort them
+  // if we have both hands, sort them right to left
   if (hands[0] && hands[1]) {
-    // order them right to left. f@*# it assume there are 2 at most
+    // f@*# it assume there are exactly 2 at this point
     if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
       // sort hands
       ofxOpenNIHand * tmp = hands[1];
@@ -104,39 +113,38 @@ void testApp::update(){
 
   // if we have 1 hand here, we can update position
   if (hands[0]) {
-    x = floor(hands[0]->getPosition().x);
-    z = floor(hands[0]->getPosition().y);
+    x = hands[0]->getPosition().x / ofWidth;
+    x = (x - margin[3]) / xDimension; // adjust for margins
+    x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
+    z = hands[0]->getPosition().y / ofHeight;
+    z = (z - margin[0]) / yDimension; // adjust for margins
+    z = min(max(z,0.0f),1.0f); // restrict to 0 and 1
+  } else {
+    x = z = 0.0f;
   }
 
-  // if we have a second hand
-  if (hands[1]) {
 
-    // calculate change for y
-    y = hands[1]->getPosition().y;
-    y_norm = (y - TOP_MARGIN) / DIM_Y_CORRECTED;
+  // if we have a second, hand we have height too
+  if (hands[1]) {
+    y = hands[1]->getPosition().y / ofHeight;
+    y = (y - margin[0]) / yDimension; // adjust for margins
+    y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
 
     // if outside deadzone
-    if (y_norm < live_margin || y_norm > 1.0f - live_margin ) {
-      // normalise all values to whatever makes sense..
-
+    if (y < liveLower || y > liveUpper ) {
       // get height values
-      y_change = y_norm;  // use y_change to do calculations on y_norm
-      if (y_norm > live_margin) y_change -= dead_range; // if y_norm > live_range, it includes dead_range; take it out 
-      y_change -= live_margin;  // center the range on 0 (so range is -live_margin .. +live_margin)
-      y_change = -y_change * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
-
-      // get position values
-      // sensor doesn't go lower than ~50 nor higher than ~620 in x
-      // sensor doesn't go lower than ~60 nor higher than ~470 in y
-      // fix it! ..
-      x_norm = (x - LEFT_MARGIN) / DIM_X_CORRECTED;
-      z_norm = (z - TOP_MARGIN) / DIM_Y_CORRECTED;
+      yChange = y;  // use y_change to do calculations on y_norm
+      // if y > liveLower, it includes deadZone; take it out
+      if (y > liveLower) yChange -= deadZone; 
+      yChange -= liveLower;  // center the range on 0 (so range is -live_margin .. +live_margin)
+      y = min(max(y,0.0f),1.0f); // restrict to -1 and 1
+      yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
 
       // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
-      terrain->AdjustHeight(y_change, x_norm, z_norm, radius); // normalised radius to window X dimension, because .. why not
+      terrain->AdjustHeight(yChange, x, z, radius); // normalised radius to window X dimension, because .. why not
     } else {
       // dead zone .. no change (for feedback purposes)
-      y_change = 0;
+      yChange = 0.0f;
     }
   }    
 
@@ -188,18 +196,20 @@ void testApp::draw(){
     glPushMatrix();
     ofSetColor(255,0,0);
     // height
-    string msg = ofToString(y,2) + " ["+ ofToString(y_norm,2) +" : " + ofToString(y_change,2) + "]";
-	  verdana.drawString(msg, 10, y - 5);
+    string msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "; " \
+    + ofToString(yChange * MAX_CHANGE,2) + "]";
+	  verdana.drawString(msg, 10, y * ofHeight - 5);
 
     // dot(s)
-    ofRect(x -2, z - 2, 4, 4);
-    ofRect(9, y - 2, 4, 4);
-    ofRect(5, DIM_Y * live_margin - 1, 20, 2); // high threshold
-    ofRect(5, DIM_Y * (1.0f - live_margin) - 1, 20, 2); // low threshold
+    ofRect(x * ofWidth -2, z * ofHeight - 2, 4, 4);
+    ofRect(9, y * ofHeight - 2, 4, 4);
+    // thresholds
+    ofRect(5, ofHeight * liveLower - 1, 15, 2); // high threshold
+    ofRect(5, ofHeight * liveUpper - 1, 15, 2); // low threshold
 
     // position
-    msg = ofToString(x) + ":" + ofToString(z);
-	  verdana.drawString(msg, x, z - 5);
+    msg = ofToString(x,2) + ":" + ofToString(z,2);
+	  verdana.drawString(msg, x * ofWidth, z * ofHeight - 5);
     
     // draw some info regarding frame counts etc
     msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));

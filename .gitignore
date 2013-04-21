@@ -1,0 +1,9 @@
+apps/devApps/*
+apps/ofTest/mySketch/obj/*
+libs/*
+*.sdf
+*.opensdf
+*.pdb
+*.ilk
+*.log
+*.obj
