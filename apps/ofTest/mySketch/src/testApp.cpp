@@ -49,6 +49,9 @@ void testApp::setup() {
     
   // setup the hand generator
   openNIDevice.addHandsGenerator();
+  // depth threshold doesn't seem to work .. or just doesn't work the way i think it deos
+  //depthThreshold = ofxOpenNIDepthThreshold(0, 0, false, true, true, true, true);
+  //openNIDevice.addDepthThreshold(depthThreshold);
 
   // required for wave gesture .. but crashes NI .. eventually
   //openNIDevice.addUserGenerator();
@@ -72,7 +75,7 @@ void testApp::setup() {
 
   openNIDevice.start();
 
-  verdana.loadFont(ofToDataPath("verdana.ttf"), 10);
+  verdana.loadFont(ofToDataPath("verdana.ttf"), 8);
 
   terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
   
@@ -92,6 +95,13 @@ void testApp::update(){
     if (i < openNIDevice.getNumTrackedHands()) {
       ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
       hands[i] = & hand;
+      // thought depth threshold would make it more accurate or faster
+      // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
+      //if(!i) {
+      //  ofxOpenNIDepthThreshold &dt = openNIDevice.getDepthThreshold(i);
+      //  dt.setNearThreshold(hand.getWorldPosition().z-50);
+      //  dt.setFarThreshold(hand.getWorldPosition().z+50);
+      //}
     } else {
       hands[i] = NULL;
     }
@@ -141,7 +151,7 @@ void testApp::update(){
       yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
 
       // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
-      terrain->AdjustHeight(yChange, x, z, radius); // normalised radius to window X dimension, because .. why not
+      terrain->AdjustHeight(yChange, x, z, radius);
     } else {
       // dead zone .. no change (for feedback purposes)
       yChange = 0.0f;
@@ -193,27 +203,30 @@ void testApp::draw(){
     //for (int j = 0; j < numUsers; j++){
     //  openNIDevice.drawSkeleton(j);
     //}
+
     glPushMatrix();
-    ofSetColor(255,0,0);
-    // height
-    string msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "; " \
-    + ofToString(yChange * MAX_CHANGE,2) + "]";
-	  verdana.drawString(msg, 10, y * ofHeight - 5);
 
-    // dot(s)
-    ofRect(x * ofWidth -2, z * ofHeight - 2, 4, 4);
-    ofRect(9, y * ofHeight - 2, 4, 4);
-    // thresholds
-    ofRect(5, ofHeight * liveLower - 1, 15, 2); // high threshold
-    ofRect(5, ofHeight * liveUpper - 1, 15, 2); // low threshold
+      ofSetColor(0,255,0);
+      // draw some info regarding frame counts etc
+      string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
+	    verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
 
-    // position
-    msg = ofToString(x,2) + ":" + ofToString(z,2);
-	  verdana.drawString(msg, x * ofWidth, z * ofHeight - 5);
+      // height
+      ofSetColor(255,0,0);
+      msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
+	    verdana.drawString(msg, 10, y * ofHeight - 2);
+      // position
+      msg = ofToString(x,2) + ":" + ofToString(z,2);
+	    verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
+
+      // dot(s)
+      ofCircle(x * ofWidth, z * ofHeight, 2);
+      ofCircle(8, y * ofHeight, 2);
+      // thresholds
+      ofSetColor(255,255,255);
+      ofRect(5, ofHeight * liveLower, 6, 1); // high threshold
+      ofRect(5, ofHeight * liveUpper, 6, 1); // low threshold
     
-    // draw some info regarding frame counts etc
-    msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
-	  verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
     glPopMatrix();
   //*/
 }

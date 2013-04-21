@@ -36,6 +36,8 @@ private:
     ofTrueTypeFont verdana;
 
     ofxOpenNIHand * hands[2];
+
+    ofxOpenNIDepthThreshold depthThreshold;
     
     float margin[4]; // used to correct for aparent dead zone on edges of sensor
     float x, y, z, radius, yChange, deadZone, liveUpper, liveLower, xDimension, yDimension, ofHeight, ofWidth;
