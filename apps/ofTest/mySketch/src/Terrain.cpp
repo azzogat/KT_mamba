@@ -19,7 +19,35 @@ float SampleHeightField(HeightField& field,float u, float v) {
 }
 
 
+ofVec3f CalculatePointNormal(HeightField& field,float x, float y,float stepX,float stepY,float XWspace,float YWspace) {
 
+  ofVec3f normal;
+
+  //stepX = 1.0f/(field.xDim -1);
+  //stepY = 1.0f/(field.yDim -1);
+
+  float h0 = SampleHeightField(field, x + 0, y - stepY );
+  float h1 = SampleHeightField(field, x - stepX, y + 0 );
+  float h2 = SampleHeightField(field, x + stepX, y + 0 );
+  float h3 = SampleHeightField(field, x + 0, y + stepY );
+
+  normal.x = h1 - h2;
+  normal.y = 2.0f * ofVec2f(stepX*XWspace,stepY*YWspace).length();
+  normal.z = h0 - h3;
+
+  //h0 = SampleHeightField(field, x + stepX, y + stepY );
+  //h1 = SampleHeightField(field, x - stepX, y + stepY );
+  //h2 = SampleHeightField(field, x + stepX, y - stepY );
+  //h3 = SampleHeightField(field, x - stepX, y - stepY );
+
+  //normal.x += h1 - h2;
+  //normal.y += D3DXVec2Length(&D3DXVECTOR2(stepX*XWspace,stepY*YWspace));
+  //normal.z += h0 - h3;
+
+
+  normal.normalize();
+  return normal;
+}
 Terrain* Terrain::Create(float width,float depth,int numHorizontalVerts,int numVerticalVerts, ofVec3f centre) {
   Terrain* tmp = new Terrain();
 
@@ -95,15 +123,54 @@ Terrain* Terrain::Create(float width,float depth,int numHorizontalVerts,int numV
       tmp->posBuffer.push_back(ofVec3f(posX,centre.y,posZ));
       tmp->normalBuffer.push_back(ofVec3f(0,1,0));
       tmp->uvBuffer.push_back(ofVec2f(x,z));
-      tmp->colorBuffer.push_back(ofFloatColor(0,0,0));
+      tmp->colorBuffer.push_back(ofVec3f(0,0,0));
     }
   }
 
-  tmp->m_meshVbo.setIndexData(&tmp->indexBuffer[0],tmp->indexBuffer.size(),GL_STATIC_DRAW);
-  tmp->m_meshVbo.setVertexData(&tmp->posBuffer[0],tmp->posBuffer.size(),GL_DYNAMIC_DRAW);
-  tmp->m_meshVbo.setNormalData(&tmp->normalBuffer[0],tmp->normalBuffer.size(),GL_DYNAMIC_DRAW);
-  tmp->m_meshVbo.setTexCoordData(&tmp->uvBuffer[0],tmp->uvBuffer.size(),GL_STATIC_DRAW);
-  tmp->m_meshVbo.setColorData(&tmp->colorBuffer[0],tmp->colorBuffer.size(),GL_DYNAMIC_DRAW);
+  ofVec3f vertices[3] = {ofVec3f(-0.5f,0,-5),ofVec3f(0.5f,0,-5),ofVec3f(0,0.5f,-5)};
+  unsigned int indices[3] = {0,1,2};
+
+  glGenVertexArrays(1,&tmp->vao);
+  glBindVertexArray(tmp->vao);
+
+  glGenBuffers(1,&tmp->vboPos);
+  glBindBuffer(GL_ARRAY_BUFFER,tmp->vboPos);
+  glBufferData(GL_ARRAY_BUFFER,tmp->posBuffer.size()*sizeof(ofVec3f),&tmp->posBuffer[0],GL_DYNAMIC_DRAW);
+
+  glVertexAttribPointer(0,3,GL_FLOAT,false,0,0);
+  glEnableVertexAttribArray(0);
+
+  glGenBuffers(1,&tmp->vboNormal);
+  glBindBuffer(GL_ARRAY_BUFFER,tmp->vboNormal);
+  glBufferData(GL_ARRAY_BUFFER,tmp->normalBuffer.size()*sizeof(ofVec3f),&tmp->normalBuffer[0],GL_DYNAMIC_DRAW);
+
+  glVertexAttribPointer(1,3,GL_FLOAT,false,0,0);
+  glEnableVertexAttribArray(1);
+
+  glGenBuffers(1,&tmp->vboUV);
+  glBindBuffer(GL_ARRAY_BUFFER,tmp->vboUV);
+  glBufferData(GL_ARRAY_BUFFER,tmp->uvBuffer.size()*sizeof(ofVec2f),&tmp->uvBuffer[0],GL_STATIC_DRAW);
+
+  glVertexAttribPointer(2,2,GL_FLOAT,false,0,0);
+  glEnableVertexAttribArray(2);
+
+  glGenBuffers(1,&tmp->vboColor);
+  glBindBuffer(GL_ARRAY_BUFFER,tmp->vboColor);
+  glBufferData(GL_ARRAY_BUFFER,tmp->colorBuffer.size()*sizeof(ofVec3f),&tmp->colorBuffer[0],GL_DYNAMIC_DRAW);
+
+  glVertexAttribPointer(3,3,GL_FLOAT,false,0,0);
+  glEnableVertexAttribArray(3);
+
+  glBindVertexArray(0);
+
+  glGenBuffers(1,&tmp->vboIndex);
+  glBindBuffer(GL_ARRAY_BUFFER,tmp->vboIndex);
+  glBufferData(GL_ARRAY_BUFFER,tmp->indexBuffer.size()*sizeof(unsigned int),&tmp->indexBuffer[0],GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER,0);
+
+  tmp->lastx = -1;
+  tmp->lastz = -1;
+
   return tmp;
 }
 
@@ -116,47 +183,78 @@ Terrain::~Terrain() {
 
 
 void Terrain::Update() {
-  if (isDirty) {
-      RecalculateTerrain();
+  if (isGeomDirty || isColorDirty) {
+      UpdateVBO();
   }
 
 }
 
 void Terrain::Draw() {
-  m_meshVbo.drawElements(GL_TRIANGLES,indexBuffer.size());
+  
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndex);
+  glDrawElements(GL_TRIANGLES,indexBuffer.size(),GL_UNSIGNED_INT,NULL);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+  glBindBuffer(GL_ARRAY_BUFFER,0);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
+  glDisableVertexAttribArray(3);
+
+  //m_meshVbo.drawElements(GL_TRIANGLES,indexBuffer.size());
+  //m_meshVbo.unbind();
 }
 
-void Terrain::RecalculateTerrain() {
+void Terrain::UpdateVBO() {
   float u = 0;
   float v = 0;
 
-  for (int z = 0; z < m_heightField.zDim; ++z) {
-    for (int x = 0; x < m_heightField.xDim; ++x) {
+  if (isGeomDirty) {
 
-      ofVec3f pos = posBuffer[(z * m_heightField.xDim)+x];
+    for (int z = 0; z < m_heightField.zDim; ++z) {
+      for (int x = 0; x < m_heightField.xDim; ++x) {
 
-      u = (float)x / (float)m_heightField.xDim;
-      v = (float)z / (float)m_heightField.zDim;
+        ofVec3f pos = posBuffer[(z * m_heightField.xDim)+x];
 
-      pos.y = SampleHeightField(m_heightField,u,v);
+        u = (float)x / (float)m_heightField.xDim;
+        v = (float)z / (float)m_heightField.zDim;
 
-      posBuffer[(z * m_heightField.xDim)+x] = pos;
+        pos.y = SampleHeightField(m_heightField,u,v);
 
-      float color = pos.y/10;
-
-      colorBuffer[(z * m_heightField.xDim)+x] = ofFloatColor(color,color,color);
+        posBuffer[(z * m_heightField.xDim)+x] = pos;
+        normalBuffer[(z * m_heightField.xDim)+x] = CalculatePointNormal(m_heightField,
+          u,v,
+          1.0f/(float)m_heightField.xDim,
+          1.0f/(float)m_heightField.zDim,
+          planeWidth/(float)m_heightField.xDim,
+          planeDepth/(float)m_heightField.zDim);
+      }                                                                 
     }
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboPos);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, posBuffer.size()*sizeof(ofVec3f),&posBuffer[0]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboNormal);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, normalBuffer.size()*sizeof(ofVec3f),&normalBuffer[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  m_meshVbo.updateVertexData(&posBuffer[0],posBuffer.size());
-  m_meshVbo.updateColorData(&colorBuffer[0],colorBuffer.size());
+  if (isColorDirty) {
+    glBindBuffer(GL_ARRAY_BUFFER, vboColor);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, colorBuffer.size()*sizeof(ofVec3f),&colorBuffer[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
 
-  isDirty = false;
+
+
+  isGeomDirty = false;
+  isColorDirty = false;
 }
 
 void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
   if (diff != 0) {
-    isDirty = true;
+    isGeomDirty = true;
     int centerX = x*(m_heightField.xDim-1);
     int centerZ = z*(m_heightField.zDim-1);
 
@@ -172,7 +270,7 @@ void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
         float d = vecToPoint.length();
 
         if (d < radiusInFiled) {
-          float normD = (1.0f-(d/radiusInFiled))*0.5f;
+          float normD = (1.0f-(d/radiusInFiled));
 
           float finalDiff = sinf(normD)*diff;
           m_heightField.values[i][j] += finalDiff;
@@ -180,4 +278,38 @@ void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
       }
     }
   }
+}
+
+void Terrain::HighLightPosition( float x,float z,float radius ) {
+
+  if (x != lastx && z != lastz) {
+	  int centerX = x*(m_heightField.xDim-1);
+	  int centerZ = z*(m_heightField.zDim-1);
+	
+	
+	  float radiusInFiled = m_heightField.xDim * radius;
+	  ofVec2f vecToPoint;
+	  ofVec2f centre(centerX,centerZ);
+	
+	 // colorBuffer[(centerZ*m_heightField.xDim)+centerX] = ofVec3f(1,0,0);
+	
+	  for (int i = 0; i < m_heightField.xDim; ++i) {
+	    for (int j = 0; j < m_heightField.zDim; ++j) {
+	
+	      vecToPoint = centre - ofVec2f(i,j);
+	      float d = vecToPoint.length();
+	      float normD = (1.0f-(d/radiusInFiled));
+	
+	      colorBuffer[(j*m_heightField.xDim)+i] = d < radiusInFiled ? ofVec3f(normD,0,0) : ofVec3f(0,0,0);
+	    }
+	  }
+
+    lastx = x;
+    lastz = z;
+
+    isColorDirty = true;
+  }
+  
+
+
 }

@@ -1,6 +1,6 @@
-#include "testApp.h"
+﻿#include "testApp.h"
 #include "GL\glew.h"
-
+#include "terrainShader.h"
 //--------------------------------------------------------------
 void testApp::setup() {
     
@@ -38,12 +38,67 @@ void testApp::setup() {
   verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
 
   terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
+
+  unsigned int m_vertexId = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(m_vertexId,1,const_cast<const char**>(&terrainVShader),NULL);
+  glCompileShader(m_vertexId);
+
+
+  GLint isCompiled = 0;
+  glGetShaderiv(m_vertexId, GL_COMPILE_STATUS, &isCompiled);
   
+  if (isCompiled == GL_FALSE) {
+    GLint maxLength = 0;
+    glGetShaderiv(m_vertexId, GL_INFO_LOG_LENGTH, &maxLength);
+
+    //The maxLength includes the NULL character
+    std::vector<GLchar> infoLog(maxLength);
+    glGetShaderInfoLog(m_vertexId, maxLength, &maxLength, &infoLog[0]);
+    std::string error(&infoLog[0]);
+  }
+
+  unsigned int m_fragmentId = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(m_fragmentId,1,const_cast<const char**>(&terrainPShader),NULL);
+  glCompileShader(m_fragmentId);
+
+
+  isCompiled = 0;
+  glGetShaderiv(m_fragmentId, GL_COMPILE_STATUS, &isCompiled);
+
+  if (isCompiled == GL_FALSE) {
+    GLint maxLength = 0;
+    glGetShaderiv(m_fragmentId, GL_INFO_LOG_LENGTH, &maxLength);
+
+    //The maxLength includes the NULL character
+    std::vector<GLchar> infoLog(maxLength);
+    glGetShaderInfoLog(m_fragmentId, maxLength, &maxLength, &infoLog[0]);
+    std::string error(&infoLog[0]);
+  }
+
+  program_id = 0;
+
+  program_id = glCreateProgram();
+  glAttachShader(program_id,m_vertexId);
+  glAttachShader(program_id,m_fragmentId);
+  glLinkProgram(program_id);
+
+  GLint isLinked = 0;
+  glGetProgramiv(program_id, GL_LINK_STATUS, (int *)&isLinked);
+
+  GLint maxLength = 0;
+  glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &maxLength);
+
+    //The maxLength includes the NULL character
+  std::vector<GLchar> infoLog(maxLength);
+  glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
     openNIDevice.update();
+    float x = (float)mouseX / (float)windowWidth;
+    float y = (float)mouseY / (float)windowHeight;
+    terrain->HighLightPosition(x,y,0.1f);
     terrain->Update();
 }
 
@@ -74,18 +129,24 @@ void testApp::draw(){
  //       ofSetColor(255,0,0);
  //       ofRect(handPosition.x, handPosition.y, 10, 10);
  //   }
-    glMatrixMode(GL_PROJECTION);
-	
-    glLoadIdentity();
-    gluPerspective(60,ofGetWidth()/ofGetHeight(),1,1000);
+
+  ofMatrix4x4 matview;
+  matview.makeIdentityMatrix();
+  matview.makeLookAtViewMatrix(ofVec3f(0,20,20),ofVec3f(0,0,0),ofVec3f(0,1,0));
+  ofMatrix4x4 matProjection;
+  matProjection.makePerspectiveMatrix(60,(float)ofGetWidth()/(float)ofGetHeight(),1,1000);
 
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0,20,20,0,0,0,0,1,0);
-    glPushMatrix();
-        terrain->Draw();
-    glPopMatrix();
+  glUseProgram(program_id);
+  int matloc = glGetUniformLocation(program_id,"mToV");
+  glUniformMatrix4fv(matloc,1,false,matview.getPtr());
+  matloc = glGetUniformLocation(program_id,"vToP");
+  glUniformMatrix4fv(matloc,1,true,matProjection.getPtr());
+
+
+  terrain->Draw();
+  glUseProgram(0);
+
 	    
 	// GUI CRAP
 	glMatrixMode(GL_PROJECTION);
@@ -121,7 +182,9 @@ void testApp::exit(){
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
   if (key == 98) {
-    terrain->AdjustHeight(0.5f,0.5f,0.5f,0.1f);
+    float x = (float)mouseX / (float)windowWidth;
+    float y = (float)mouseY / (float)windowHeight;
+    terrain->AdjustHeight(0.1f,x,y,0.1f);
   }
 }
 
@@ -132,6 +195,9 @@ void testApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
+
+  mouseX = x;
+  mouseY = y;
 
 	// check what the point is over
 	KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(x,y));
@@ -167,5 +233,9 @@ void testApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void testApp::windowResized(int w, int h){
+  RECT clientRect;
 
+
+  windowWidth = w;
+  windowHeight = h;
 }

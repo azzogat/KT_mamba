@@ -16,11 +16,12 @@ public:
   void Update();
   void Draw();
   void AdjustHeight(float diff,float x,float z,float radius);
+  void HighLightPosition(float x,float z,float radius);
   ~Terrain();
 private:
-  Terrain():isDirty(false){}
+  Terrain():isGeomDirty(false){}
 
-  void RecalculateTerrain();
+  void UpdateVBO();
   HeightField m_heightField;
   ofVbo m_meshVbo;
 
@@ -28,9 +29,18 @@ private:
   std::vector<ofVec3f> posBuffer;
   std::vector<ofVec3f> normalBuffer;
   std::vector<ofVec2f> uvBuffer;
-  std::vector<ofFloatColor> colorBuffer;
+  std::vector<ofVec3f> colorBuffer;
   float planeWidth;
   float planeDepth;
-  bool isDirty;
+  bool isGeomDirty;
+  bool isColorDirty;
+  unsigned int vao;
+  unsigned int vboPos;
+  unsigned int vboNormal;
+  unsigned int vboUV;
+  unsigned int vboColor;
+  unsigned int vboIndex;
+  float lastx;
+  float lastz;
 };
 #endif // Terrain_h__

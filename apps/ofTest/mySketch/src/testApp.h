@@ -32,6 +32,9 @@ private:
     Terrain* terrain;
 	ofxOpenNI openNIDevice;
     ofTrueTypeFont verdana;
+    int windowWidth;
+    int windowHeight;
+    unsigned int program_id;
     
 };
 
