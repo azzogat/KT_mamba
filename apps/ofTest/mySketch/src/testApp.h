@@ -34,11 +34,9 @@ private:
   	ofxOpenNI openNIDevice;
 
     ofTrueTypeFont verdana;
-<<<<<<< HEAD
     int windowWidth;
     int windowHeight;
     unsigned int program_id;
-=======
 
     ofxOpenNIHand * hands[2];
 

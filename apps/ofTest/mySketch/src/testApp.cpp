@@ -104,83 +104,107 @@ void testApp::setup() {
   glShaderSource(m_fragmentId,1,const_cast<const char**>(&terrainPShader),NULL);
   glCompileShader(m_fragmentId);
 
+  isCompiled = 0;
+  glGetShaderiv(m_fragmentId, GL_COMPILE_STATUS, &isCompiled);
 
-  // get tracked hands and stuff them into our array
-  for (int i = 0; i < MAX_HANDS; i++) {
-    if (i < openNIDevice.getNumTrackedHands()) {
-      ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
-      hands[i] = & hand;
-      // thought depth threshold would make it more accurate or faster
-      // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
-      //if(!i) {
-      //  ofxOpenNIDepthThreshold &dt = openNIDevice.getDepthThreshold(i);
-      //  dt.setNearThreshold(hand.getWorldPosition().z-50);
-      //  dt.setFarThreshold(hand.getWorldPosition().z+50);
-      //}
-    } else {
-      hands[i] = NULL;
-    }
+  if (isCompiled == GL_FALSE) {
+    GLint maxLength = 0;
+    glGetShaderiv(m_fragmentId, GL_INFO_LOG_LENGTH, &maxLength);
+
+    //The maxLength includes the NULL character
+    std::vector<GLchar> infoLog(maxLength);
+    glGetShaderInfoLog(m_fragmentId, maxLength, &maxLength, &infoLog[0]);
+    std::string error(&infoLog[0]);
   }
 
-  // hand 0 will be position. it's the one on the right
-  // hand 1 will be for height.. it's the other one
+  
+  program_id = glCreateProgram();
+  
+  glAttachShader(program_id,m_vertexId);
+  glAttachShader(program_id,m_fragmentId);
 
-  // if we have both hands, sort them right to left
-  if (hands[0] && hands[1]) {
-    // f@*# it assume there are exactly 2 at this point
-    if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
-      // sort hands
-      ofxOpenNIHand * tmp = hands[1];
-      hands[1] = hands[0];
-      hands[0] = tmp;
-    }
-  }
+  glLinkProgram(program_id);
 
-  // if we have 1 hand here, we can update position
-  if (hands[0]) {
-    x = hands[0]->getPosition().x / ofWidth;
-    x = (x - margin[3]) / xDimension; // adjust for margins
-    x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
-    // using depth now. it's in mm
-    z = hands[0]->getWorldPosition().z * 0.001; // metres now
-    // we want to look at anything between 1.0 and 1.6?
-    z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
-    
-    // we can get height from y now...
-    y = hands[0]->getPosition().y / ofHeight;
-    y = (y - margin[0]) / yDimension; // adjust for margins
-    y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
-    // if outside deadzone
-    if (y < liveLower || y > liveUpper ) {
-      // get height values
-      yChange = y;  // use y_change to do calculations on y_norm
-      // if y > liveLower, it includes deadZone; take it out
-      if (y > liveLower) yChange -= deadZone; 
-      yChange -= liveLower;  // center the range on 0 (so range is -live_margin .. +live_margin)
-      y = min(max(y,0.0f),1.0f); // restrict to -1 and 1
-      yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
-
-      // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
-      terrain->AdjustHeight(yChange, x, z, radius);
-    } else {
-      // dead zone .. no change (for feedback purposes)
-      yChange = 0.0f;
-    }
-  } else {
-    x = z = y = 0.5f;
-  }
 
   GLint maxLength = 0;
   glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &maxLength);
 
-    //The maxLength includes the NULL character
+  //The maxLength includes the NULL character
   std::vector<GLchar> infoLog(maxLength);
   glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
+
+
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
     openNIDevice.update();
+
+    // get tracked hands and stuff them into our array
+    for (int i = 0; i < MAX_HANDS; i++) {
+      if (i < openNIDevice.getNumTrackedHands()) {
+        ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
+        hands[i] = & hand;
+        // thought depth threshold would make it more accurate or faster
+        // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
+        //if(!i) {
+        //  ofxOpenNIDepthThreshold &dt = openNIDevice.getDepthThreshold(i);
+        //  dt.setNearThreshold(hand.getWorldPosition().z-50);
+        //  dt.setFarThreshold(hand.getWorldPosition().z+50);
+        //}
+      } else {
+        hands[i] = NULL;
+      }
+    }
+
+    // hand 0 will be position. it's the one on the right
+    // hand 1 will be for height.. it's the other one
+
+    // if we have both hands, sort them right to left
+    if (hands[0] && hands[1]) {
+      // f@*# it assume there are exactly 2 at this point
+      if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
+        // sort hands
+        ofxOpenNIHand * tmp = hands[1];
+        hands[1] = hands[0];
+        hands[0] = tmp;
+      }
+    }
+
+    // if we have 1 hand here, we can update position
+    if (hands[0]) {
+      x = hands[0]->getPosition().x / ofWidth;
+      x = (x - margin[3]) / xDimension; // adjust for margins
+      x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
+      // using depth now. it's in mm
+      z = hands[0]->getWorldPosition().z * 0.001; // metres now
+      // we want to look at anything between 1.0 and 1.6?
+      z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
+
+      // we can get height from y now...
+      y = hands[0]->getPosition().y / ofHeight;
+      y = (y - margin[0]) / yDimension; // adjust for margins
+      y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
+      // if outside deadzone
+      if (y < liveLower || y > liveUpper ) {
+        // get height values
+        yChange = y;  // use y_change to do calculations on y_norm
+        // if y > liveLower, it includes deadZone; take it out
+        if (y > liveLower) yChange -= deadZone; 
+        yChange -= liveLower;  // center the range on 0 (so range is -live_margin .. +live_margin)
+        y = min(max(y,0.0f),1.0f); // restrict to -1 and 1
+        yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
+
+        // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
+        terrain->AdjustHeight(yChange, x, z, radius);
+      } else {
+        // dead zone .. no change (for feedback purposes)
+        yChange = 0.0f;
+      }
+    } else {
+      x = z = y = 0.5f;
+    }
+
     float x = (float)mouseX / (float)windowWidth;
     float y = (float)mouseY / (float)windowHeight;
     terrain->HighLightPosition(x,y,0.1f);
@@ -189,6 +213,12 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
+
+  //glPushMatrix();
+  //ofSetColor(0, 0, 255);
+  //openNIDevice.drawDepth();
+  //openNIDevice.drawHands();
+  //glPopMatrix();
 
   ofMatrix4x4 matview;
   matview.makeIdentityMatrix();
@@ -215,11 +245,11 @@ void testApp::draw(){
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-  /* GUI CRAP
+   //GUI CRAP
 	  glPushMatrix();
 		  m_gui.Draw();
 	  glPopMatrix();
-  //*/
+  
 
   //* INPUT FEEDBACK CRAP
     //ofSetColor(255, 255, 255);

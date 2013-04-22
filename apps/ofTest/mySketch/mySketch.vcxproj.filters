@@ -56,5 +56,8 @@
     <ClInclude Include="src\KTGui.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\terrainShader.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

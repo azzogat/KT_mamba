@@ -113,6 +113,7 @@
   <ItemGroup>
     <ClInclude Include="src\KTGui.h" />
     <ClInclude Include="src\Terrain.h" />
+    <ClInclude Include="src\terrainShader.h" />
     <ClInclude Include="src\testApp.h" />
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNI.h" />
     <ClInclude Include="..\..\..\addons\ofxOpenNI.git\src\ofxOpenNITypes.h" />
