@@ -3,9 +3,40 @@
 #include "terrainShader.h"
 //--------------------------------------------------------------
 void testApp::setup() {
-    
+  
+  MAX_HANDS = 2;
+  MAX_CHANGE = 2;
 
-  ofSetLogLevel(OF_LOG_VERBOSE);
+  // using margins to correct apparent sensor inaccuracy (could be unique to device)
+  // sensor doesn't go lower than ~50 nor higher than ~620 in x
+  // sensor doesn't go lower than ~60 nor higher than ~470 in y
+  margin[0] = 0.125f;       // top
+  margin[1] = 0.03125f;     // right
+  margin[2] = 0.02083333f;  // bottom
+  margin[3] = 0.078125f;    // left
+  // using smaller range for x..
+  margin[1] = margin[1] + 0.2f;
+  margin[3] = margin[3] + 0.2f;
+
+  ofWidth = ofGetWidth();
+  ofHeight = ofGetHeight();
+  xDimension = 1.0f - margin[3] - margin[1];
+  yDimension = 1.0f - margin[0] - margin[2];
+
+  radius = 0.0f;
+  deadZone = 0.1f; // dead zone for input
+  liveLower = (1.0f - deadZone) * 0.5f;
+  liveUpper = (1.0f + deadZone) * 0.5f;
+
+  // init with 0
+  x = y = z = yChange = 0;
+  // ..and NULL
+  for (int i = 0; i < MAX_HANDS; i++) {
+    hands[i] = NULL;
+  }
+
+  //ofSetLogLevel(OF_LOG_VERBOSE); // ..no, STFU
+  ofSetLogLevel(OF_LOG_NOTICE);
 
   glewInit();
 
@@ -19,23 +50,35 @@ void testApp::setup() {
   openNIDevice.setRegister(true);
   openNIDevice.setMirror(true);
     
-    // setup the hand generator
+  // setup the hand generator
   openNIDevice.addHandsGenerator();
-  openNIDevice.addGestureGenerator();
-    // add all focus gestures (ie., wave, click, raise arm)
+  // depth threshold doesn't seem to work .. or just doesn't work the way i think it deos
+  //depthThreshold = ofxOpenNIDepthThreshold(0, 0, false, true, true, true, true);
+  //openNIDevice.addDepthThreshold(depthThreshold);
+
+  // required for wave gesture .. but crashes NI .. eventually
+  //openNIDevice.addUserGenerator();
+  //openNIDevice.addGestureGenerator();
+
+  // you can use this to get a list of gestures
+  // prints to console and/or you can use the returned vector  
+  //vector<string> gestureNames = openNIDevice.getAvailableGestures();
+
+  // add all focus gestures (ie., wave, click, raise arm)
 	openNIDevice.addAllHandFocusGestures();
-    
-    // or you can add them one at a time
-    //vector<string> gestureNames = openNIDevice.getAvailableGestures(); // you can use this to get a list of gestures
-                                                                         // prints to console and/or you can use the returned vector
-  openNIDevice.addGesture("Click");
-  openNIDevice.setMaxNumHands(4);
+
+  // or you can add them one at a time
+  // Wave Click RaiseHand MovingHand
+  //openNIDevice.addGesture("Wave");
+
+  openNIDevice.setMaxNumHands(MAX_HANDS);
+  // openNIDevice.setMaxNumUsers(1); // only used with skeleton stuff
     
   ofAddListener(openNIDevice.gestureEvent,this,&testApp::handEvent); 
 
   openNIDevice.start();
 
-  verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
+  verdana.loadFont(ofToDataPath("verdana.ttf"), 10);
 
   terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
 
@@ -62,28 +105,70 @@ void testApp::setup() {
   glCompileShader(m_fragmentId);
 
 
-  isCompiled = 0;
-  glGetShaderiv(m_fragmentId, GL_COMPILE_STATUS, &isCompiled);
-
-  if (isCompiled == GL_FALSE) {
-    GLint maxLength = 0;
-    glGetShaderiv(m_fragmentId, GL_INFO_LOG_LENGTH, &maxLength);
-
-    //The maxLength includes the NULL character
-    std::vector<GLchar> infoLog(maxLength);
-    glGetShaderInfoLog(m_fragmentId, maxLength, &maxLength, &infoLog[0]);
-    std::string error(&infoLog[0]);
+  // get tracked hands and stuff them into our array
+  for (int i = 0; i < MAX_HANDS; i++) {
+    if (i < openNIDevice.getNumTrackedHands()) {
+      ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
+      hands[i] = & hand;
+      // thought depth threshold would make it more accurate or faster
+      // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
+      //if(!i) {
+      //  ofxOpenNIDepthThreshold &dt = openNIDevice.getDepthThreshold(i);
+      //  dt.setNearThreshold(hand.getWorldPosition().z-50);
+      //  dt.setFarThreshold(hand.getWorldPosition().z+50);
+      //}
+    } else {
+      hands[i] = NULL;
+    }
   }
 
-  program_id = 0;
+  // hand 0 will be position. it's the one on the right
+  // hand 1 will be for height.. it's the other one
 
-  program_id = glCreateProgram();
-  glAttachShader(program_id,m_vertexId);
-  glAttachShader(program_id,m_fragmentId);
-  glLinkProgram(program_id);
+  // if we have both hands, sort them right to left
+  if (hands[0] && hands[1]) {
+    // f@*# it assume there are exactly 2 at this point
+    if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
+      // sort hands
+      ofxOpenNIHand * tmp = hands[1];
+      hands[1] = hands[0];
+      hands[0] = tmp;
+    }
+  }
 
-  GLint isLinked = 0;
-  glGetProgramiv(program_id, GL_LINK_STATUS, (int *)&isLinked);
+  // if we have 1 hand here, we can update position
+  if (hands[0]) {
+    x = hands[0]->getPosition().x / ofWidth;
+    x = (x - margin[3]) / xDimension; // adjust for margins
+    x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
+    // using depth now. it's in mm
+    z = hands[0]->getWorldPosition().z * 0.001; // metres now
+    // we want to look at anything between 1.0 and 1.6?
+    z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
+    
+    // we can get height from y now...
+    y = hands[0]->getPosition().y / ofHeight;
+    y = (y - margin[0]) / yDimension; // adjust for margins
+    y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
+    // if outside deadzone
+    if (y < liveLower || y > liveUpper ) {
+      // get height values
+      yChange = y;  // use y_change to do calculations on y_norm
+      // if y > liveLower, it includes deadZone; take it out
+      if (y > liveLower) yChange -= deadZone; 
+      yChange -= liveLower;  // center the range on 0 (so range is -live_margin .. +live_margin)
+      y = min(max(y,0.0f),1.0f); // restrict to -1 and 1
+      yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
+
+      // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
+      terrain->AdjustHeight(yChange, x, z, radius);
+    } else {
+      // dead zone .. no change (for feedback purposes)
+      yChange = 0.0f;
+    }
+  } else {
+    x = z = y = 0.5f;
+  }
 
   GLint maxLength = 0;
   glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &maxLength);
@@ -104,31 +189,6 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	//ofSetColor(255, 255, 255);
- //   
- //   ofPushMatrix();
- //   // draw debug (ie., image, depth, skeleton)
- //   //openNIDevice.drawDebug();
- //   ofPopMatrix();
- //   
- //   ofPushMatrix();
- //   // get number of current hands
- //   int numHands = openNIDevice.getNumTrackedHands();
- //   
- //   // iterate through users
- //   for (int i = 0; i < numHands; i++){
- //       
- //       // get a reference to this user
- //       ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
- //       
- //       // get hand position
- //       ofPoint & handPosition = hand.getPosition();
- //       // do something with the positions like:
- //       
- //       // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
- //       ofSetColor(255,0,0);
- //       ofRect(handPosition.x, handPosition.y, 10, 10);
- //   }
 
   ofMatrix4x4 matview;
   matview.makeIdentityMatrix();
@@ -148,30 +208,64 @@ void testApp::draw(){
   glUseProgram(0);
 
 	    
-	// GUI CRAP
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	// GUI RELATED CRAP  
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
 	glOrtho(0, ofGetWidth(), ofGetHeight(), 0, -ofGetHeight(), ofGetHeight());
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glPushMatrix();
-		m_gui.Draw();
-	glPopMatrix();
-    //ofPopMatrix();
+  /* GUI CRAP
+	  glPushMatrix();
+		  m_gui.Draw();
+	  glPopMatrix();
+  //*/
+
+  //* INPUT FEEDBACK CRAP
+    //ofSetColor(255, 255, 255);
+    //int numUsers = openNIDevice.getNumTrackedUsers();
+    //for (int j = 0; j < numUsers; j++){
+    //  openNIDevice.drawSkeleton(j);
+    //}
+
+    glPushMatrix();
+
+      ofSetColor(0,255,0);
+      // draw some info regarding frame counts etc
+      string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
+	    verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
+
+      // height
+      ofSetColor(255,0,0);
+      msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
+	    verdana.drawString(msg, 10, y * ofHeight - 2);
+      // position
+      msg = ofToString(x,2) + ":" + ofToString(z,2);
+	    verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
+      
+      // radius
+      ofCircle(40, 40, radius*30);
+      msg = ofToString(radius,2);
+	    verdana.drawString(msg, 70, 35);
+      // dot(s)
+      ofCircle(x * ofWidth, z * ofHeight, 2);
+      ofCircle(8, y * ofHeight, 2);
+      // thresholds
+      ofSetColor(255,255,255);
+      ofRect(5, ofHeight * liveLower, 6, 1); // high threshold
+      ofRect(5, ofHeight * liveUpper, 6, 1); // low threshold
     
-    // draw some info regarding frame counts etc
-	//ofSetColor(0, 255, 0);
-	//string msg = " MILLIS: " + ofToString(ofGetElapsedTimeMillis()) + " FPS: " + ofToString(ofGetFrameRate()) + " Device FPS: " + ofToString(openNIDevice.getFrameRate());
-    
-	//verdana.drawString(msg, 20, openNIDevice.getNumDevices() * 480 - 20);
+    glPopMatrix();
+  //*/
 }
 
 //--------------------------------------------------------------
 void testApp::handEvent(ofxOpenNIGestureEvent & event){
-    // show hand event messages in the console
-	if(event.gestureName == "Wave")
-		ofLogNotice() << event.gestureName << "for hand" << event.gestureName << "from device" << event.deviceID;
+  // show hand event messages in the console
+	if(event.gestureName == "Wave" || event.gestureName == "Click") {
+    ofLogNotice() << event.gestureName;
+    // export data .. to csv? .. so you can import it in .. excel?
+  }
 }
 
 //--------------------------------------------------------------

@@ -29,13 +29,25 @@ public:
 private:
     
     void handEvent(ofxOpenNIGestureEvent & event);
+
     Terrain* terrain;
-	ofxOpenNI openNIDevice;
+  	ofxOpenNI openNIDevice;
+
     ofTrueTypeFont verdana;
+<<<<<<< HEAD
     int windowWidth;
     int windowHeight;
     unsigned int program_id;
+=======
+
+    ofxOpenNIHand * hands[2];
+
+    ofxOpenNIDepthThreshold depthThreshold;
+>>>>>>> refs/remotes/origin/master
     
+    float margin[4]; // used to correct for aparent dead zone on edges of sensor
+    float x, y, z, radius, yChange, deadZone, liveUpper, liveLower, xDimension, yDimension, ofHeight, ofWidth;
+    int MAX_HANDS, MAX_CHANGE;
 };
 
 #endif

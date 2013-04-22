@@ -1,4 +1,10 @@
 /ipch/
 /obj/
+/bin/
 /mySketch.opensdf
 /mySketch.sdf
+/mySketch.vcxproj
+/mySketch.vcxproj.filters
+/mySketch.vcxproj.user
+/mySketch.sln
+/mySketch.suo
