@@ -14,14 +14,17 @@ void testApp::setup() {
   margin[1] = 0.03125f;     // right
   margin[2] = 0.02083333f;  // bottom
   margin[3] = 0.078125f;    // left
+  // using smaller range for x..
+  margin[1] = margin[1] + 0.2f;
+  margin[3] = margin[3] + 0.2f;
 
   ofWidth = ofGetWidth();
   ofHeight = ofGetHeight();
   xDimension = 1.0f - margin[3] - margin[1];
   yDimension = 1.0f - margin[0] - margin[2];
 
-  radius = 0.2f;
-  deadZone = 0.2f; // dead zone for input
+  radius = 0.0f;
+  deadZone = 0.1f; // dead zone for input
   liveLower = (1.0f - deadZone) * 0.5f;
   liveUpper = (1.0f + deadZone) * 0.5f;
 
@@ -75,7 +78,7 @@ void testApp::setup() {
 
   openNIDevice.start();
 
-  verdana.loadFont(ofToDataPath("verdana.ttf"), 8);
+  verdana.loadFont(ofToDataPath("verdana.ttf"), 10);
 
   terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
   
@@ -89,6 +92,7 @@ void testApp::update(){
   // openNIDevice.getNumTrackedHands() often returns a number greater
   // than actual hands in the array of hands OpenNI is tracking...
   // ... this £@!#$ up on getTrackeHand(messed_up_index) ...
+  // could try to hack NI to check and return a new (empty) hand .. ?
 
   // get tracked hands and stuff them into our array
   for (int i = 0; i < MAX_HANDS; i++) {
@@ -126,20 +130,15 @@ void testApp::update(){
     x = hands[0]->getPosition().x / ofWidth;
     x = (x - margin[3]) / xDimension; // adjust for margins
     x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
-    z = hands[0]->getPosition().y / ofHeight;
-    z = (z - margin[0]) / yDimension; // adjust for margins
-    z = min(max(z,0.0f),1.0f); // restrict to 0 and 1
-  } else {
-    x = z = 0.0f;
-  }
-
-
-  // if we have a second, hand we have height too
-  if (hands[1]) {
-    y = hands[1]->getPosition().y / ofHeight;
+    // using depth now. it's in mm
+    z = hands[0]->getWorldPosition().z * 0.001; // metres now
+    // we want to look at anything between 1.0 and 1.6?
+    z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
+    
+    // we can get height from y now...
+    y = hands[0]->getPosition().y / ofHeight;
     y = (y - margin[0]) / yDimension; // adjust for margins
     y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
-
     // if outside deadzone
     if (y < liveLower || y > liveUpper ) {
       // get height values
@@ -156,6 +155,18 @@ void testApp::update(){
       // dead zone .. no change (for feedback purposes)
       yChange = 0.0f;
     }
+  } else {
+    x = z = y = 0.5f;
+  }
+
+  // if we have a second hand ... 0_0 ... then that's just redundant
+  if (hands[1]) {
+    // ignore it? ... NOOO, radius!
+    radius = hands[1]->getPosition().y / ofHeight; // normalize and invert
+    radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
+    radius = 1.0f - radius; // invert
+    radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum 
+    
   }    
 
   terrain->Update();
@@ -168,6 +179,7 @@ void testApp::draw(){
   glPushMatrix();
   ofSetColor(0, 0, 255);
   openNIDevice.drawDepth();
+  //openNIDevice.drawHands();
   glPopMatrix();
   //*/
 
@@ -218,7 +230,11 @@ void testApp::draw(){
       // position
       msg = ofToString(x,2) + ":" + ofToString(z,2);
 	    verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
-
+      
+      // radius
+      ofCircle(40, 40, radius*30);
+      msg = ofToString(radius,2);
+	    verdana.drawString(msg, 70, 35);
       // dot(s)
       ofCircle(x * ofWidth, z * ofHeight, 2);
       ofCircle(8, y * ofHeight, 2);
