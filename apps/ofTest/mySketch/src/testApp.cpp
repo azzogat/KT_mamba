@@ -131,7 +131,7 @@ void testApp::setup() {
 
   //The maxLength includes the NULL character
   std::vector<GLchar> infoLog(maxLength);
-  glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
+  //glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
 
 
 }
@@ -205,6 +205,15 @@ void testApp::update(){
       x = z = y = 0.5f;
     }
 
+    // if we have a second hand ... 0_0 ... then that's just redundant
+    if (hands[1]) {
+      // ignore it? ... NOOO, radius!
+      radius = hands[1]->getPosition().y / ofHeight; // normalize and invert
+      radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
+      radius = 1.0f - radius; // invert
+      radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
+    }    
+
     float x = (float)mouseX / (float)windowWidth;
     float y = (float)mouseY / (float)windowHeight;
     terrain->HighLightPosition(x,y,0.1f);
@@ -217,7 +226,7 @@ void testApp::draw(){
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
   //openNIDevice.drawDepth();
-  //openNIDevice.drawHands();
+  openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
