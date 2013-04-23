@@ -28,6 +28,8 @@
 
 #include "ofxOpenNI.h"
 
+
+ofxOpenNIHand dummyhand;
 /**************************************************************
  *
  *      constructor and setup methods
@@ -41,7 +43,7 @@ ofxOpenNI::ofxOpenNI(){
 
     LOG_NAME = "ofxOpenNIDevice[" + ofToString(instanceID) + "]";
     //cout << LOG_NAME << ": constructor called" << endl;
-
+    dummyhand.id = -2;
 	bIsThreaded = false;
 	g_bIsDepthOn = false;
 	g_bIsDepthRawOn = false;
@@ -2211,6 +2213,10 @@ int	ofxOpenNI::getNumTrackedHands(){
 //--------------------------------------------------------------
 ofxOpenNIHand& ofxOpenNI::getTrackedHand(int index){
     ofxOpenNIScopedLock scopedLock(bIsThreaded, mutex);
+    if (index >= currentTrackedHandIDs.size())
+    {
+      return dummyhand;
+    }
     return currentTrackedHands[currentTrackedHandIDs[index]];
 }
 

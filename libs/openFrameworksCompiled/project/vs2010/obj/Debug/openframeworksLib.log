@@ -1,74 +1,17 @@
-﻿Build started 04/04/2013 13:29:00.
-     1>Project "C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" on node 2 (build target(s)).
+﻿Build started 23/04/2013 16:00:18.
+     1>Project "C:\Git\KT_mamba\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "obj\Debug\openframeworksLib.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          All outputs are up-to-date.
        Lib:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\..\lib\vs2010\openframeworksLibDebug.lib" /NOLOGO obj\Debug\of3dUtils.obj
-         obj\Debug\ofCamera.obj
-         obj\Debug\ofEasyCam.obj
-         obj\Debug\ofMesh.obj
-         obj\Debug\ofNode.obj
-         obj\Debug\ofAppGlutWindow.obj
-         obj\Debug\ofAppRunner.obj
-         obj\Debug\ofEvents.obj
-         obj\Debug\ofFbo.obj
-         obj\Debug\ofGLRenderer.obj
-         obj\Debug\ofLight.obj
-         obj\Debug\ofMaterial.obj
-         obj\Debug\ofShader.obj
-         obj\Debug\ofTexture.obj
-         obj\Debug\ofVbo.obj
-         obj\Debug\ofVboMesh.obj
-         obj\Debug\ofBitmapFont.obj
-         obj\Debug\ofCairoRenderer.obj
-         obj\Debug\ofGraphics.obj
-         obj\Debug\ofImage.obj
-         obj\Debug\ofPath.obj
-         obj\Debug\ofPixels.obj
-         obj\Debug\ofPolyline.obj
-         obj\Debug\ofTessellator.obj
-         obj\Debug\ofTrueTypeFont.obj
-         obj\Debug\ofMath.obj
-         obj\Debug\ofMatrix3x3.obj
-         obj\Debug\ofMatrix4x4.obj
-         obj\Debug\ofQuaternion.obj
-         obj\Debug\ofVec2f.obj
-         obj\Debug\ofVec4f.obj
-         obj\Debug\ofBaseSoundPlayer.obj
-         obj\Debug\ofBaseSoundStream.obj
-         obj\Debug\ofFmodSoundPlayer.obj
-         obj\Debug\ofRtAudioSoundStream.obj
-         obj\Debug\ofSoundPlayer.obj
-         obj\Debug\ofSoundStream.obj
-         obj\Debug\ofBaseTypes.obj
-         obj\Debug\ofColor.obj
-         obj\Debug\ofPoint.obj
-         obj\Debug\ofRectangle.obj
-         obj\Debug\ofFileUtils.obj
-         obj\Debug\ofLog.obj
-         obj\Debug\ofSystemUtils.obj
-         obj\Debug\ofThread.obj
-         obj\Debug\ofURLFileLoader.obj
-         obj\Debug\ofUtils.obj
-         obj\Debug\ofDirectShowGrabber.obj
-         obj\Debug\ofQtUtils.obj
-         obj\Debug\ofQuickTimeGrabber.obj
-         obj\Debug\ofQuickTimePlayer.obj
-         obj\Debug\ofVideoGrabber.obj
-         obj\Debug\ofVideoPlayer.obj
-         obj\Debug\ofArduino.obj
-         obj\Debug\ofSerial.obj
-     1>ofPoint.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-     1>ofBaseSoundStream.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-     1>ofBaseSoundPlayer.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-         openframeworksLib.vcxproj -> C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\..\..\lib\vs2010\openframeworksLibDebug.lib
+         All outputs are up-to-date.
+         openframeworksLib.vcxproj -> C:\Git\KT_mamba\libs\openFrameworksCompiled\project\vs2010\..\..\lib\vs2010\openframeworksLibDebug.lib
        FinalizeBuildStatus:
          Deleting file "obj\Debug\openframeworksLib.unsuccessfulbuild".
          Touching "obj\Debug\openframeworksLib.lastbuildstate".
-     1>Done Building Project "C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" (build target(s)).
+     1>Done Building Project "C:\Git\KT_mamba\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:13.75
+Time Elapsed 00:00:00.07
