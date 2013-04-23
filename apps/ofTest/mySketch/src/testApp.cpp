@@ -214,9 +214,11 @@ void testApp::update(){
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
     }    
 
-    float x = (float)mouseX / (float)windowWidth;
-    float y = (float)mouseY / (float)windowHeight;
-    terrain->HighLightPosition(x,y,0.1f);
+    // the following should probably be my x, z and radius values instead?
+    //float x = (float)mouseX / (float)windowWidth;
+    //float y = (float)mouseY / (float)windowHeight;
+    //terrain->HighLightPosition(x,y,0.1f);
+    terrain->HighLightPosition(x,z,max(radius,0.1f));
     terrain->Update();
 }
 
@@ -226,7 +228,7 @@ void testApp::draw(){
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
   //openNIDevice.drawDepth();
-  openNIDevice.drawHands();
+  //openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
@@ -314,7 +316,7 @@ void testApp::exit(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-  if (key == 98) {
+  if (key == 98) { // which key is 98?! :/
     float x = (float)mouseX / (float)windowWidth;
     float y = (float)mouseY / (float)windowHeight;
     terrain->AdjustHeight(0.1f,x,y,0.1f);
