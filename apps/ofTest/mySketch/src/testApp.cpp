@@ -125,6 +125,8 @@ void testApp::setup() {
 
   glLinkProgram(program_id);
 
+  GLint isLinked = 0;
+  glGetProgramiv(program_id,GL_LINK_STATUS,&isLinked);
 
   GLint maxLength = 0;
   glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &maxLength);
@@ -143,7 +145,12 @@ void testApp::update(){
     // get tracked hands and stuff them into our array
     for (int i = 0; i < MAX_HANDS; i++) {
       if (i < openNIDevice.getNumTrackedHands()) {
+
         ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
+        if (hand.getID() == -2)
+        {
+          break;
+        }
         hands[i] = & hand;
         // thought depth threshold would make it more accurate or faster
         // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
@@ -214,9 +221,11 @@ void testApp::update(){
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
     }    
 
-    float x = (float)mouseX / (float)windowWidth;
-    float y = (float)mouseY / (float)windowHeight;
-    terrain->HighLightPosition(x,y,0.1f);
+
+    //float x = (float)mouseX / (float)windowWidth;
+    //float y = (float)mouseY / (float)windowHeight;
+    //terrain->HighLightPosition(x,y,0.1f);
+    terrain->HighLightPosition(x,z,max(radius,0.1f));
     terrain->Update();
 }
 
@@ -225,13 +234,13 @@ void testApp::draw(){
 
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
-  //openNIDevice.drawDepth();
+  openNIDevice.drawDepth();
   openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
   matview.makeIdentityMatrix();
-  matview.makeLookAtViewMatrix(ofVec3f(0,20,20),ofVec3f(0,0,0),ofVec3f(0,1,0));
+  matview.makeLookAtViewMatrix(ofVec3f(0,10,10),ofVec3f(0,0,0),ofVec3f(0,1,0));
   ofMatrix4x4 matProjection;
   matProjection.makePerspectiveMatrix(60,(float)ofGetWidth()/(float)ofGetHeight(),1,1000);
 
@@ -256,7 +265,7 @@ void testApp::draw(){
 
    //GUI CRAP
 	  glPushMatrix();
-		  m_gui.Draw();
+		 // m_gui.Draw();
 	  glPopMatrix();
   
 
