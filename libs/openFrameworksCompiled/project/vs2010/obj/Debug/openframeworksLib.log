@@ -1,11 +1,12 @@
-﻿Build started 04/04/2013 13:29:00.
-     1>Project "C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" on node 2 (build target(s)).
+﻿Build started 4/22/2013 9:34:57 AM.
+     1>Project "D:\Gold Projects\KT_mamba\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "obj\Debug\openframeworksLib.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\..\..\libs\openFrameworks /I..\..\..\..\libs\openFrameworks\graphics /I..\..\..\..\libs\openFrameworks\app /I..\..\..\..\libs\openFrameworks\sound /I..\..\..\..\libs\openFrameworks\utils /I..\..\..\..\libs\openFrameworks\communication /I..\..\..\..\libs\openFrameworks\video /I..\..\..\..\libs\openFrameworks\types /I..\..\..\..\libs\openFrameworks\math /I..\..\..\..\libs\openFrameworks\3d /I..\..\..\..\libs\openFrameworks\gl /I..\..\..\..\libs\openFrameworks\events /I..\..\..\..\libs\glut\include /I..\..\..\..\libs\rtAudio\include /I..\..\..\..\libs\quicktime\include /I..\..\..\..\libs\freetype\include /I..\..\..\..\libs\freetype\include\freetype2 /I..\..\..\..\libs\freeImage\include /I..\..\..\..\libs\fmodex\include /I..\..\..\..\libs\videoInput\include /I..\..\..\..\libs\glew\include\ /I..\..\..\..\libs\glu\include /I..\..\..\..\libs\tess2\include /I..\..\..\..\libs\cairo\include\cairo /I..\..\..\..\libs\poco\include /I..\..\..\addons /ZI /nologo /W1 /WX- /Od /Oi /Ot /Oy- /GT /D WIN32 /D _DEBUG /D _CONSOLE /D POCO_STATIC /D CAIRO_WIN32_STATIC_BUILD /D DISABLE_SOME_FLOATING_POINT /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Debug\\" /Fd"obj\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\openFrameworks\gl\ofVbo.cpp
+         ofVbo.cpp
        Lib:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\..\lib\vs2010\openframeworksLibDebug.lib" /NOLOGO obj\Debug\of3dUtils.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\..\lib\vs2010\openframeworksLibDebug.lib" /NOLOGO obj\Debug\of3dUtils.obj
          obj\Debug\ofCamera.obj
          obj\Debug\ofEasyCam.obj
          obj\Debug\ofMesh.obj
@@ -63,12 +64,12 @@
      1>ofPoint.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
      1>ofBaseSoundStream.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
      1>ofBaseSoundPlayer.obj : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-         openframeworksLib.vcxproj -> C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\..\..\lib\vs2010\openframeworksLibDebug.lib
+         openframeworksLib.vcxproj -> D:\Gold Projects\KT_mamba\libs\openFrameworksCompiled\project\vs2010\..\..\lib\vs2010\openframeworksLibDebug.lib
        FinalizeBuildStatus:
          Deleting file "obj\Debug\openframeworksLib.unsuccessfulbuild".
          Touching "obj\Debug\openframeworksLib.lastbuildstate".
-     1>Done Building Project "C:\DEV\ofRoxlu\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" (build target(s)).
+     1>Done Building Project "D:\Gold Projects\KT_mamba\libs\openFrameworksCompiled\project\vs2010\openframeworksLib.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:13.75
+Time Elapsed 00:00:01.69
