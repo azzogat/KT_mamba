@@ -201,7 +201,7 @@ void testApp::update(){
 
     // if we have 1 hand here, we can update position
     if (hands[0]) {
-      x = hands[0]->getPosition().x / ofGetWidth();
+      x = hands[0]->getPosition().x / 640;
       x = (x - margin[3]) / xDimension; // adjust for margins
       x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
       // using depth now. it's in mm
@@ -210,7 +210,7 @@ void testApp::update(){
       z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
 
       // we can get height from y now...
-      y = hands[0]->getPosition().y / ofGetHeight();
+      y = hands[0]->getPosition().y / 480;
       y = (y - margin[0]) / yDimension; // adjust for margins
       y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
       // if outside deadzone
@@ -235,16 +235,16 @@ void testApp::update(){
     // if we have a second hand ... 0_0 ... then that's just redundant
     if (hands[1]) {
       // ignore it? ... NOOO, radius!
-      radius = hands[1]->getPosition().y / ofGetHeight(); // normalize and invert
+      radius = hands[1]->getPosition().y / 480; // normalize and invert
       radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
       radius = 1.0f - radius; // invert
       radius = min(max(radius,0.0f),1.0f) * 0.6f; // scale to 0.6 as maximum     
       // record left hand position
-      left_hand_x = hands[1]->getPosition().x / ofGetWidth();
-      left_hand_x = (left_hand_x - margin[3] + reduced_x) / (xDimension + 2 * reduced_x); // un-adjust for margins
+      left_hand_x = hands[1]->getPosition().x / 640;
+      left_hand_x = (left_hand_x - margin[3]) / (xDimension); // un-adjust for margins
       left_hand_x = min(max(left_hand_x,0.0f),1.0f); // restrict to 0 and 1
       // using depth now. it's in mm
-      left_hand_y = hands[1]->getPosition().y / ofGetHeight();
+      left_hand_y = hands[1]->getPosition().y / 480;
       left_hand_y = (left_hand_y - margin[0]) / yDimension; // adjust for margins
       left_hand_y = min(max(left_hand_y,0.0f),1.0f); // restrict to 0 and 1
 
@@ -259,7 +259,7 @@ void testApp::update(){
     if (!radius) {
       // UI stuff
       // check what the point is over
-	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x * ofWidth,left_hand_y * ofGetHeight()));
+	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x * ofGetWidth(),left_hand_y * ofGetHeight()));
 	    if(pressed != KT_NONE)
 	    {
 		    //printf("Point over button \n");
@@ -348,17 +348,17 @@ void testApp::draw(){
       ofSetColor(255,0,0);
       //msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
       msg = ofToString(yChange,2);
-	    verdana.drawString(msg, 18, y * ofHeight + 2);
+	    verdana.drawString(msg, 18, y * ofGetHeight() + 2);
       // position
       //msg = ofToString(x,2) + ":" + ofToString(z,2);
-	  //verdana.drawString(msg, x * ofWidth + 8, z * ofHeight + 2);
+	  //verdana.drawString(msg, x * ofWidth + 8, z * ofGetHeight() + 2);
       // radius
       ofCircle(40, 40, radius*30);
       //msg = ofToString(radius,2);
 	    //verdana.drawString(msg, 70, 35);
       // left hand
       if(!radius && has_left) {
-        ofCircle(left_hand_x * ofWidth, left_hand_y * ofHeight, 6);
+        ofCircle(left_hand_x * ofGetWidth(), left_hand_y * ofGetHeight(), 6);
         // hover indicator
         if(hover_timer) {
           ofSetColor(0,0,255);

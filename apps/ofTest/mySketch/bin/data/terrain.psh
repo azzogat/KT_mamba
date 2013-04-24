@@ -37,8 +37,8 @@ vec3 SampleTriPlanar(sampler2D tex,vec3 normal,vec3 PositionWS) {
 	vec3 sand = SampleTriPlanar(sandTex,outNormal,outPos);
 	vec3 rock = SampleTriPlanar(rockTex,outNormal,outPos);
 	float grassHi = 0.1;
-	float sandLo = 0.2;
-	float sandHi = 0.35;
+	float sandLo = 0.15;
+	float sandHi = 0.2;
 	float rockLo = 0.4;
 	
 	if (slope <= grassHi) {
