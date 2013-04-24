@@ -6,7 +6,7 @@
 void testApp::setup() {
   
   MAX_HANDS = 2;
-  MAX_CHANGE = 2;
+  MAX_CHANGE = 1;
 
   has_left = false;
   has_right = false;
