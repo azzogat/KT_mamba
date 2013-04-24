@@ -36,10 +36,10 @@ vec3 SampleTriPlanar(sampler2D tex,vec3 normal,vec3 PositionWS) {
 	vec3 grass = SampleTriPlanar(grassTex,outNormal,outPos);
 	vec3 sand = SampleTriPlanar(sandTex,outNormal,outPos);
 	vec3 rock = SampleTriPlanar(rockTex,outNormal,outPos);
-	float grassHi = 0.3;
-	float sandLo = 0.5;
-	float sandHi = 0.7;
-	float rockLo = 0.8;
+	float grassHi = 0.1;
+	float sandLo = 0.2;
+	float sandHi = 0.35;
+	float rockLo = 0.4;
 	
 	if (slope <= grassHi) {
 		color = grass;
@@ -58,6 +58,6 @@ vec3 SampleTriPlanar(sampler2D tex,vec3 normal,vec3 PositionWS) {
 		color += (blend) * rock;
 	}
 	if(slope > rockLo) color = rock;
-	color = color*0.2 + color*NdotL + outColor;
+	color = color*0.3 + color*NdotL + outColor;
     gl_FragColor = vec4(color,1);
   }

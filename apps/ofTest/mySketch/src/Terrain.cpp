@@ -270,8 +270,8 @@ void Terrain::UpdateVBO() {
           u,v,
           1.0f/(float)m_heightField.xDim,
           1.0f/(float)m_heightField.zDim,
-          planeWidth/(float)m_heightField.xDim,
-          planeDepth/(float)m_heightField.zDim);
+          planeWidth,
+          planeDepth);
       }                                                                 
     }
 
