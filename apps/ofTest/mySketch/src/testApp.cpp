@@ -238,7 +238,7 @@ void testApp::update(){
       radius = hands[1]->getPosition().y / ofGetHeight(); // normalize and invert
       radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
       radius = 1.0f - radius; // invert
-      radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
+      radius = min(max(radius,0.0f),1.0f) * 0.6f; // scale to 0.6 as maximum     
       // record left hand position
       left_hand_x = hands[1]->getPosition().x / ofGetWidth();
       left_hand_x = (left_hand_x - margin[3] + reduced_x) / (xDimension + 2 * reduced_x); // un-adjust for margins
@@ -268,7 +268,7 @@ void testApp::update(){
 		      {
 			      case KT_RESET:
 				      // reset terrain
-              ofLogNotice() << "RESET TERRAIN";
+					terrain->Reset();
 			      break;
             case KT_EXPORT:
 				      // export terrain
