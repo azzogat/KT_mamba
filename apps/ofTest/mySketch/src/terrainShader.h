@@ -77,8 +77,8 @@ const char* terrainPShader =
       "color += (1-blend) * sand;"
       "color += (blend) * rock;"
     "}"
-    "if(slope <= rockLo) color = rock;"
-    "color += outColor;"
+    "if(slope >= rockLo) color = rock;"
+    "color = sand;"
     "gl_FragColor = vec4(color,1);"
   "}";
 
