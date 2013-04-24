@@ -253,6 +253,7 @@ void testApp::update(){
       has_left = true;
     } else {
       has_left = false;
+      radius = 0.0f;
     }
 
     if (!radius) {
