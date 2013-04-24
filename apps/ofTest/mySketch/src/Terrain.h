@@ -17,6 +17,7 @@ public:
   void Draw();
   void AdjustHeight(float diff,float x,float z,float radius);
   void HighLightPosition(float x,float z,float radius);
+  void Reset();
   ~Terrain();
 private:
   Terrain():isGeomDirty(false){}
