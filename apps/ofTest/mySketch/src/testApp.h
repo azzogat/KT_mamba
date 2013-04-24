@@ -6,7 +6,7 @@
 #include "Terrain.h"
 #include "KTGui.h"
 
-#define MAX_DEVICES 2
+ #define MAX_DEVICES 2
 
 class testApp : public ofBaseApp{
 
