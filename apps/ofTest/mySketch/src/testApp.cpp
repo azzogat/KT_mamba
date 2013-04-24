@@ -161,7 +161,7 @@ void testApp::update(){
     // hand 1 will be for height.. it's the other one
 
     // if we have both hands, sort them right to left
-    if (hands[0] && hands[1]) {
+      if (hands[0] && hands[1]) {
       // f@*# it assume there are exactly 2 at this point
       if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
         // sort hands
