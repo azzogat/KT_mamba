@@ -1,6 +1,7 @@
 ﻿#include "testApp.h"
 #include "GL\glew.h"
 #include "terrainShader.h"
+#include "ofFileUtils.h"
 //--------------------------------------------------------------
 void testApp::setup() {
   
@@ -80,10 +81,17 @@ void testApp::setup() {
 
   verdana.loadFont(ofToDataPath("verdana.ttf"), 10);
 
-  terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
+
+  ofBuffer vsh = ofBufferFromFile("terrain.vsh");
+  const char* vshp= vsh.getBinaryBuffer();
+
+  ofBuffer psh = ofBufferFromFile("terrain.psh");
+  const char* pshp= psh.getBinaryBuffer();
+
+  terrain = Terrain::Create(20,20,4,4,ofVec3f(0,0,0));
 
   unsigned int m_vertexId = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(m_vertexId,1,const_cast<const char**>(&terrainVShader),NULL);
+  glShaderSource(m_vertexId,1,&vshp,NULL);
   glCompileShader(m_vertexId);
 
 
@@ -101,7 +109,7 @@ void testApp::setup() {
   }
 
   unsigned int m_fragmentId = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(m_fragmentId,1,const_cast<const char**>(&terrainPShader),NULL);
+  glShaderSource(m_fragmentId,1,&pshp,NULL);
   glCompileShader(m_fragmentId);
 
   isCompiled = 0;
@@ -122,6 +130,11 @@ void testApp::setup() {
   
   glAttachShader(program_id,m_vertexId);
   glAttachShader(program_id,m_fragmentId);
+
+  glBindAttribLocation(program_id,0,"pos");
+  glBindAttribLocation(program_id,1,"normal");
+  glBindAttribLocation(program_id,2,"uv");
+  glBindAttribLocation(program_id,3,"color");
 
   glLinkProgram(program_id);
 
@@ -249,7 +262,7 @@ void testApp::draw(){
   int matloc = glGetUniformLocation(program_id,"mToV");
   glUniformMatrix4fv(matloc,1,false,matview.getPtr());
   matloc = glGetUniformLocation(program_id,"vToP");
-  glUniformMatrix4fv(matloc,1,true,matProjection.getPtr());
+  glUniformMatrix4fv(matloc,1,false,matProjection.getPtr());
 
 
   terrain->Draw(program_id);
@@ -257,16 +270,16 @@ void testApp::draw(){
 
 	    
 	// GUI RELATED CRAP  
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-	glOrtho(0, ofGetWidth(), ofGetHeight(), 0, -ofGetHeight(), ofGetHeight());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+ // glMatrixMode(GL_PROJECTION);
+ // glLoadIdentity();
+	//glOrtho(0, ofGetWidth(), ofGetHeight(), 0, -ofGetHeight(), ofGetHeight());
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
 
-   //GUI CRAP
-	  glPushMatrix();
-		 // m_gui.Draw();
-	  glPopMatrix();
+ //  //GUI CRAP
+	//  glPushMatrix();
+	//	 // m_gui.Draw();
+	//  glPopMatrix();
   
 
   //* INPUT FEEDBACK CRAP
@@ -276,34 +289,34 @@ void testApp::draw(){
     //  openNIDevice.drawSkeleton(j);
     //}
 
-    glPushMatrix();
+    //glPushMatrix();
 
-      ofSetColor(0,255,0);
-      // draw some info regarding frame counts etc
-      string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
-	    verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
+    //  ofSetColor(0,255,0);
+    //  // draw some info regarding frame counts etc
+    //  string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
+	   // verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
 
-      // height
-      ofSetColor(255,0,0);
-      msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
-	    verdana.drawString(msg, 10, y * ofHeight - 2);
-      // position
-      msg = ofToString(x,2) + ":" + ofToString(z,2);
-	    verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
-      
-      // radius
-      ofCircle(40, 40, radius*30);
-      msg = ofToString(radius,2);
-	    verdana.drawString(msg, 70, 35);
-      // dot(s)
-      ofCircle(x * ofWidth, z * ofHeight, 2);
-      ofCircle(8, y * ofHeight, 2);
-      // thresholds
-      ofSetColor(255,255,255);
-      ofRect(5, ofHeight * liveLower, 6, 1); // high threshold
-      ofRect(5, ofHeight * liveUpper, 6, 1); // low threshold
-    
-    glPopMatrix();
+    //  // height
+    //  ofSetColor(255,0,0);
+    //  msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
+	   // verdana.drawString(msg, 10, y * ofHeight - 2);
+    //  // position
+    //  msg = ofToString(x,2) + ":" + ofToString(z,2);
+	   // verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
+    //  
+    //  // radius
+    //  ofCircle(40, 40, radius*30);
+    //  msg = ofToString(radius,2);
+	   // verdana.drawString(msg, 70, 35);
+    //  // dot(s)
+    //  ofCircle(x * ofWidth, z * ofHeight, 2);
+    //  ofCircle(8, y * ofHeight, 2);
+    //  // thresholds
+    //  ofSetColor(255,255,255);
+    //  ofRect(5, ofHeight * liveLower, 6, 1); // high threshold
+    //  ofRect(5, ofHeight * liveUpper, 6, 1); // low threshold
+    //
+    //glPopMatrix();
   //*/
 }
 
