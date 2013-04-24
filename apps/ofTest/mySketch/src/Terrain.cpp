@@ -26,8 +26,8 @@ unsigned int CreateTexture(unsigned char* pixels, unsigned int width, unsigned i
   
   glBindTexture(GL_TEXTURE_2D, id);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)pixels);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   return id;
 }
@@ -228,12 +228,12 @@ void Terrain::Draw(unsigned int shaderID) {
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,sandTex);
   texLoc = glGetUniformLocation(shaderID,"sandTex");
-  glUniform1i(texLoc,0);
+  glUniform1i(texLoc,1);
 
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D,rockTex);
   texLoc = glGetUniformLocation(shaderID,"rockTex");
-  glUniform1i(texLoc,0);
+  glUniform1i(texLoc,2);
 
   glDrawElements(GL_TRIANGLES,indexBuffer.size(),GL_UNSIGNED_INT,NULL);
   glBindVertexArray(0);

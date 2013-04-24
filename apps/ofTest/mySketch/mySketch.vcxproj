@@ -50,7 +50,7 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\nite;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni\Win32;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni;C:\Program Files %28x86%29\OpenNI\Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\OpenNI2\Lib;$(SolutionDir)../../../libs\openNI;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\nite;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni\Win32;C:\DEV\ofRoxlu\addons\ofxOpenNI.git\include\openni;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\OpenNI2\Lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\OpenNI2\Lib;$(SolutionDir)../../../libs\openNI;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
