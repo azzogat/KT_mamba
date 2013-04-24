@@ -249,7 +249,7 @@ void testApp::draw(){
   int matloc = glGetUniformLocation(program_id,"mToV");
   glUniformMatrix4fv(matloc,1,false,matview.getPtr());
   matloc = glGetUniformLocation(program_id,"vToP");
-  glUniformMatrix4fv(matloc,1,true,matProjection.getPtr());
+  glUniformMatrix4fv(matloc,1,false,matProjection.getPtr());
 
 
   terrain->Draw(program_id);
