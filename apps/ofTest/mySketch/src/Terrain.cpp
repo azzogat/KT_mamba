@@ -313,3 +313,17 @@ void Terrain::HighLightPosition( float x,float z,float radius ) {
 
 
 }
+
+void Terrain::Reset()
+{
+  for (int i = 0; i < m_heightField.xDim; ++i) {
+    for (int j = 0; j < m_heightField.zDim; ++j) {
+
+      m_heightField.values[i][j] = 0.0f;
+    }
+  }
+  
+  isGeomDirty = true;
+
+  UpdateVBO();
+}
