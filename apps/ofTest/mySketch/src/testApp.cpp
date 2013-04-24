@@ -88,7 +88,7 @@ void testApp::setup() {
   ofBuffer psh = ofBufferFromFile("terrain.psh");
   const char* pshp= psh.getBinaryBuffer();
 
-  terrain = Terrain::Create(20,20,4,4,ofVec3f(0,0,0));
+  terrain = Terrain::Create(20,20,64,64,ofVec3f(0,0,0));
 
   unsigned int m_vertexId = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(m_vertexId,1,&vshp,NULL);
@@ -253,7 +253,7 @@ void testApp::draw(){
 
   ofMatrix4x4 matview;
   matview.makeIdentityMatrix();
-  matview.makeLookAtViewMatrix(ofVec3f(0,10,10),ofVec3f(0,0,0),ofVec3f(0,1,0));
+  matview.makeLookAtViewMatrix(ofVec3f(0,20,15),ofVec3f(0,0,0),ofVec3f(0,1,0));
   ofMatrix4x4 matProjection;
   matProjection.makePerspectiveMatrix(60,(float)ofGetWidth()/(float)ofGetHeight(),1,1000);
 
