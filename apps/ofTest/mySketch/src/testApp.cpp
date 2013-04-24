@@ -30,6 +30,9 @@ void testApp::setup() {
 
   // init with 0
   x = y = z = yChange = 0;
+  left_hand_x = left_hand_y = 0.0f;
+  hover_timer = 0;
+
   // ..and NULL
   for (int i = 0; i < MAX_HANDS; i++) {
     hands[i] = NULL;
@@ -219,7 +222,39 @@ void testApp::update(){
       radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
       radius = 1.0f - radius; // invert
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
-    }    
+      // record left hand position
+      left_hand_x = hands[1]->getPosition().x / ofWidth;
+      left_hand_x = (left_hand_x - margin[3]) / xDimension; // adjust for margins
+      left_hand_x = min(max(left_hand_x,0.0f),1.0f); // restrict to 0 and 1
+      // using depth now. it's in mm
+      left_hand_y = hands[1]->getPosition().y / ofHeight;
+      left_hand_y = (left_hand_y - margin[0]) / yDimension; // adjust for margins
+      left_hand_y = min(max(left_hand_y,0.0f),1.0f); // restrict to 0 and 1
+    }
+
+    if (!radius) {
+      // UI stuff
+      // check what the point is over
+	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x,left_hand_y));
+	    if(pressed != KT_NONE)
+	    {
+		    printf("Point over button \n");
+        if(hover_timer++ == 1000) {
+		      switch( pressed )
+		      {
+			      case KT_RESET:
+				      // reset terrain
+              
+			      break;
+            case KT_EXPORT:
+				      // export terrain
+			      break;
+		      }
+        }
+	    } else {
+        hover_timer = 0;
+      }
+    }
 
     // the following should probably be my x, z and radius values instead?
     //float x = (float)mouseX / (float)windowWidth;
@@ -235,7 +270,7 @@ void testApp::draw(){
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
   openNIDevice.drawDepth();
-  openNIDevice.drawHands();
+  //openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
@@ -265,7 +300,7 @@ void testApp::draw(){
 
    //GUI CRAP
 	  glPushMatrix();
-		 // m_gui.Draw();
+		  m_gui.Draw();
 	  glPopMatrix();
   
 
@@ -295,6 +330,12 @@ void testApp::draw(){
       ofCircle(40, 40, radius*30);
       msg = ofToString(radius,2);
 	    verdana.drawString(msg, 70, 35);
+      // left hand
+      if(!radius) {
+        ofSetColor(255,255,0);
+        ofCircle(left_hand_x * ofWidth, left_hand_y * ofHeight, 5);
+        ofSetColor(255,0,0);
+      }
       // dot(s)
       ofCircle(x * ofWidth, z * ofHeight, 2);
       ofCircle(8, y * ofHeight, 2);
@@ -348,11 +389,11 @@ void testApp::mouseMoved(int x, int y ){
 		printf("Point over button \n");
 		switch( pressed )
 		{
-			case KT_RAISE:
-				// raise terrain
+			case KT_RESET:
+				// reset terrain
 			break;
-			case KT_LOWER:
-				// lower terrain
+      case KT_EXPORT:
+				// reset terrain
 			break;
 		}
 	}

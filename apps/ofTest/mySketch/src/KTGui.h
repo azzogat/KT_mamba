@@ -10,8 +10,8 @@
 enum KT_PRESSED
 {
 	KT_NONE,
-	KT_RAISE,
-	KT_LOWER
+	KT_RESET,
+  KT_EXPORT
 };
 
 class KTGui 
