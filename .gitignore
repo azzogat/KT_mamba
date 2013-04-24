@@ -7,3 +7,6 @@
 *.ilk
 *.log
 *.obj
+*.suo
+*.vcxproj
+*.vcxproj.filters

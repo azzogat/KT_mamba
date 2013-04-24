@@ -125,13 +125,15 @@ void testApp::setup() {
 
   glLinkProgram(program_id);
 
+  GLint isLinked = 0;
+  glGetProgramiv(program_id,GL_LINK_STATUS,&isLinked);
 
   GLint maxLength = 0;
   glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &maxLength);
 
   //The maxLength includes the NULL character
   std::vector<GLchar> infoLog(maxLength);
-  glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
+  //glGetProgramInfoLog(program_id, maxLength, &maxLength, &infoLog[0]);
 
 
 }
@@ -143,7 +145,12 @@ void testApp::update(){
     // get tracked hands and stuff them into our array
     for (int i = 0; i < MAX_HANDS; i++) {
       if (i < openNIDevice.getNumTrackedHands()) {
+
         ofxOpenNIHand & hand = openNIDevice.getTrackedHand(i);
+        if (hand.getID() == -2)
+        {
+          break;
+        }
         hands[i] = & hand;
         // thought depth threshold would make it more accurate or faster
         // instead, it seems to .. doesn't (slower & no perceivable limit imposed)
@@ -205,9 +212,20 @@ void testApp::update(){
       x = z = y = 0.5f;
     }
 
-    float x = (float)mouseX / (float)windowWidth;
-    float y = (float)mouseY / (float)windowHeight;
-    terrain->HighLightPosition(x,y,0.1f);
+    // if we have a second hand ... 0_0 ... then that's just redundant
+    if (hands[1]) {
+      // ignore it? ... NOOO, radius!
+      radius = hands[1]->getPosition().y / ofHeight; // normalize and invert
+      radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
+      radius = 1.0f - radius; // invert
+      radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
+    }    
+
+    // the following should probably be my x, z and radius values instead?
+    //float x = (float)mouseX / (float)windowWidth;
+    //float y = (float)mouseY / (float)windowHeight;
+    //terrain->HighLightPosition(x,y,0.1f);
+    terrain->HighLightPosition(x,z,max(radius,0.1f));
     terrain->Update();
 }
 
@@ -216,13 +234,13 @@ void testApp::draw(){
 
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
-  //openNIDevice.drawDepth();
-  //openNIDevice.drawHands();
+  openNIDevice.drawDepth();
+  openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
   matview.makeIdentityMatrix();
-  matview.makeLookAtViewMatrix(ofVec3f(0,20,20),ofVec3f(0,0,0),ofVec3f(0,1,0));
+  matview.makeLookAtViewMatrix(ofVec3f(0,10,10),ofVec3f(0,0,0),ofVec3f(0,1,0));
   ofMatrix4x4 matProjection;
   matProjection.makePerspectiveMatrix(60,(float)ofGetWidth()/(float)ofGetHeight(),1,1000);
 
@@ -247,7 +265,7 @@ void testApp::draw(){
 
    //GUI CRAP
 	  glPushMatrix();
-		  m_gui.Draw();
+		 // m_gui.Draw();
 	  glPopMatrix();
   
 
@@ -305,7 +323,7 @@ void testApp::exit(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-  if (key == 98) {
+  if (key == 98) { // which key is 98?! :/
     float x = (float)mouseX / (float)windowWidth;
     float y = (float)mouseY / (float)windowHeight;
     terrain->AdjustHeight(0.1f,x,y,0.1f);
