@@ -14,7 +14,7 @@ class Terrain {
 public:
   static Terrain* Create(float width,float depth,int numHorizontalVerts,int numVerticalVerts, ofVec3f centre);
   void Update();
-  void Draw();
+  void Draw(unsigned int shaderID);
   void AdjustHeight(float diff,float x,float z,float radius);
   void HighLightPosition(float x,float z,float radius);
   ~Terrain();
@@ -40,6 +40,9 @@ private:
   unsigned int vboUV;
   unsigned int vboColor;
   unsigned int vboIndex;
+  unsigned int grassTex;
+  unsigned int sandTex;
+  unsigned int rockTex;
   float lastx;
   float lastz;
 };

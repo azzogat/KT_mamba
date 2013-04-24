@@ -234,7 +234,7 @@ void testApp::draw(){
   glUniformMatrix4fv(matloc,1,true,matProjection.getPtr());
 
 
-  terrain->Draw();
+  terrain->Draw(program_id);
   glUseProgram(0);
 
 	    

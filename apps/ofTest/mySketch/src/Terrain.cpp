@@ -1,5 +1,6 @@
 #include "Terrain.h"
 #include "ofVec2f.h"
+#include "ofImage.h"
 
 float Saturate(float val){
   if (val < 0.0f) {
@@ -18,6 +19,18 @@ float SampleHeightField(HeightField& field,float u, float v) {
   return field.values[pixelX][pixelY];
 }
 
+unsigned int CreateTexture(unsigned char* pixels, unsigned int width, unsigned int height) {
+  
+  unsigned int id = 0;
+  glGenTextures(1,&id);
+  
+  glBindTexture(GL_TEXTURE_2D, id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  return id;
+}
 
 ofVec3f CalculatePointNormal(HeightField& field,float x, float y,float stepX,float stepY,float XWspace,float YWspace) {
 
@@ -50,6 +63,18 @@ ofVec3f CalculatePointNormal(HeightField& field,float x, float y,float stepX,flo
 }
 Terrain* Terrain::Create(float width,float depth,int numHorizontalVerts,int numVerticalVerts, ofVec3f centre) {
   Terrain* tmp = new Terrain();
+
+  ofImage grassImg;
+  grassImg.loadImage("grass.png");
+  ofImage sandImg;
+  sandImg.loadImage("sand.png");
+  ofImage rockImg;
+  rockImg.loadImage("rock.png");
+
+
+  tmp->grassTex = CreateTexture(grassImg.getPixels(),grassImg.getWidth(),grassImg.getHeight());
+  tmp->sandTex = CreateTexture(sandImg.getPixels(),sandImg.getWidth(),sandImg.getHeight());
+  tmp->rockTex = CreateTexture(rockImg.getPixels(),rockImg.getWidth(),rockImg.getHeight());
 
   tmp->m_heightField.xDim = numHorizontalVerts;
   tmp->m_heightField.zDim = numVerticalVerts;
@@ -189,10 +214,27 @@ void Terrain::Update() {
 
 }
 
-void Terrain::Draw() {
+void Terrain::Draw(unsigned int shaderID) {
   
   glBindVertexArray(vao);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndex);
+
+  unsigned int texLoc;
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D,grassTex);
+  texLoc = glGetUniformLocation(shaderID,"grassTex");
+  glUniform1i(texLoc,0);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D,sandTex);
+  texLoc = glGetUniformLocation(shaderID,"sandTex");
+  glUniform1i(texLoc,0);
+
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D,rockTex);
+  texLoc = glGetUniformLocation(shaderID,"rockTex");
+  glUniform1i(texLoc,0);
+
   glDrawElements(GL_TRIANGLES,indexBuffer.size(),GL_UNSIGNED_INT,NULL);
   glBindVertexArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
@@ -201,6 +243,7 @@ void Terrain::Draw() {
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(2);
   glDisableVertexAttribArray(3);
+
 
   //m_meshVbo.drawElements(GL_TRIANGLES,indexBuffer.size());
   //m_meshVbo.unbind();
