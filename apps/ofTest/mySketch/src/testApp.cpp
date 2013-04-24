@@ -168,7 +168,7 @@ void testApp::update(){
     // hand 1 will be for height.. it's the other one
 
     // if we have both hands, sort them right to left
-    if (hands[0] && hands[1]) {
+      if (hands[0] && hands[1]) {
       // f@*# it assume there are exactly 2 at this point
       if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
         // sort hands
@@ -221,7 +221,7 @@ void testApp::update(){
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
     }    
 
-
+    // the following should probably be my x, z and radius values instead?
     //float x = (float)mouseX / (float)windowWidth;
     //float y = (float)mouseY / (float)windowHeight;
     //terrain->HighLightPosition(x,y,0.1f);
@@ -252,7 +252,7 @@ void testApp::draw(){
   glUniformMatrix4fv(matloc,1,true,matProjection.getPtr());
 
 
-  terrain->Draw();
+  terrain->Draw(program_id);
   glUseProgram(0);
 
 	    
@@ -323,7 +323,7 @@ void testApp::exit(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-  if (key == 98) {
+  if (key == 98) { // which key is 98?! :/
     float x = (float)mouseX / (float)windowWidth;
     float y = (float)mouseY / (float)windowHeight;
     terrain->AdjustHeight(0.1f,x,y,0.1f);
