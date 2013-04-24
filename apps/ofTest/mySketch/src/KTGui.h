@@ -1,6 +1,7 @@
 #include "ofVec2f.h"
 #include "ofVbo.h"
 #include "ofRectangle.h"
+#include "ofMain.h"
 
 // debug graphics
 #include "ofGraphics.h"
@@ -29,6 +30,10 @@ class KTGui
 			m_boundingBox.y			= _pos.y;
 			m_boundingBox.width		= _size.x;
 			m_boundingBox.height	= _size.y;
+		}
+
+		void setHeight( float y) {
+			m_boundingBox.y = y;
 		}
 	};
 

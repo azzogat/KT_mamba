@@ -201,7 +201,7 @@ void testApp::update(){
 
     // if we have 1 hand here, we can update position
     if (hands[0]) {
-      x = hands[0]->getPosition().x / ofWidth;
+      x = hands[0]->getPosition().x / ofGetWidth();
       x = (x - margin[3]) / xDimension; // adjust for margins
       x = min(max(x,0.0f),1.0f); // restrict to 0 and 1
       // using depth now. it's in mm
@@ -210,7 +210,7 @@ void testApp::update(){
       z = min( max( (z - 1.0f) / 0.6f, 0.0f ), 1.0f );
 
       // we can get height from y now...
-      y = hands[0]->getPosition().y / ofHeight;
+      y = hands[0]->getPosition().y / ofGetHeight();
       y = (y - margin[0]) / yDimension; // adjust for margins
       y = min(max(y,0.0f),1.0f); // restrict to 0 and 1
       // if outside deadzone
@@ -235,16 +235,16 @@ void testApp::update(){
     // if we have a second hand ... 0_0 ... then that's just redundant
     if (hands[1]) {
       // ignore it? ... NOOO, radius!
-      radius = hands[1]->getPosition().y / ofHeight; // normalize and invert
+      radius = hands[1]->getPosition().y / ofGetHeight(); // normalize and invert
       radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
       radius = 1.0f - radius; // invert
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
       // record left hand position
-      left_hand_x = hands[1]->getPosition().x / ofWidth;
+      left_hand_x = hands[1]->getPosition().x / ofGetWidth();
       left_hand_x = (left_hand_x - margin[3] + reduced_x) / (xDimension + 2 * reduced_x); // un-adjust for margins
       left_hand_x = min(max(left_hand_x,0.0f),1.0f); // restrict to 0 and 1
       // using depth now. it's in mm
-      left_hand_y = hands[1]->getPosition().y / ofHeight;
+      left_hand_y = hands[1]->getPosition().y / ofGetHeight();
       left_hand_y = (left_hand_y - margin[0]) / yDimension; // adjust for margins
       left_hand_y = min(max(left_hand_y,0.0f),1.0f); // restrict to 0 and 1
 
@@ -259,7 +259,7 @@ void testApp::update(){
     if (!radius) {
       // UI stuff
       // check what the point is over
-	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x * ofWidth,left_hand_y * ofHeight));
+	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x * ofWidth,left_hand_y * ofGetHeight()));
 	    if(pressed != KT_NONE)
 	    {
 		    //printf("Point over button \n");
@@ -338,20 +338,20 @@ void testApp::draw(){
       ofSetColor(0,255,0);
       // draw some info regarding frame counts etc
       string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
-	    verdana.drawString(msg, 6, openNIDevice.getNumDevices() * 480 - 6);
+	    verdana.drawString(msg, 6, openNIDevice.getNumDevices() * ofGetHeight() - 6);
       // hand indicator
       ofSetColor(255,0,0);
       if(has_right) ofSetColor(255,127,39);
       if(has_left) ofSetColor(0,255,0);
-      ofCircle(150,440,20);
+      ofCircle(150,ofGetHeight()-40,20);
       // height
       ofSetColor(255,0,0);
       //msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
       msg = ofToString(yChange,2);
 	    verdana.drawString(msg, 18, y * ofHeight + 2);
       // position
-      msg = ofToString(x,2) + ":" + ofToString(z,2);
-	    verdana.drawString(msg, x * ofWidth + 8, z * ofHeight + 2);
+      //msg = ofToString(x,2) + ":" + ofToString(z,2);
+	  //verdana.drawString(msg, x * ofWidth + 8, z * ofHeight + 2);
       // radius
       ofCircle(40, 40, radius*30);
       //msg = ofToString(radius,2);
@@ -363,17 +363,17 @@ void testApp::draw(){
         if(hover_timer) {
           ofSetColor(0,0,255);
           if(hover_timer >= hover_timer_delay) ofSetColor(255,0,255);
-          ofCircle(150,440,min(20,20 * hover_timer/hover_timer_delay));
+          ofCircle(150,ofGetHeight()-40,min(20,20 * hover_timer/hover_timer_delay));
         }
       }
       // dot(s)
       ofSetColor(255,0,0);
-      ofCircle(x * ofWidth, z * ofHeight, 3); // redundant
-      ofCircle(8, y * ofHeight, 3);
+      //ofCircle(x * ofGetWidth(), z * ofGetHeight(), 3); // redundant
+      ofCircle(8, y * ofGetHeight(), 3);
       // thresholds
       ofSetColor(255,255,255);
-      ofRect(5, ofHeight * liveLower, 6, 2); // high threshold
-      ofRect(5, ofHeight * liveUpper, 6, 2); // low threshold 
+      ofRect(5, ofGetHeight() * liveLower, 6, 2); // high threshold
+      ofRect(5, ofGetHeight() * liveUpper, 6, 2); // low threshold 
     glPopMatrix();
   //*/
 }
@@ -448,7 +448,8 @@ void testApp::mouseReleased(int x, int y, int button){
 void testApp::windowResized(int w, int h){
   RECT clientRect;
 
-
   windowWidth = w;
   windowHeight = h;
+  ofHeight = h;
+  ofWidth = w;
 }
