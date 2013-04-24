@@ -8,6 +8,9 @@ void testApp::setup() {
   MAX_HANDS = 2;
   MAX_CHANGE = 2;
 
+  has_left = false;
+  has_right = false;
+
   // using margins to correct apparent sensor inaccuracy (could be unique to device)
   // sensor doesn't go lower than ~50 nor higher than ~620 in x
   // sensor doesn't go lower than ~60 nor higher than ~470 in y
@@ -16,8 +19,9 @@ void testApp::setup() {
   margin[2] = 0.02083333f;  // bottom
   margin[3] = 0.078125f;    // left
   // using smaller range for x..
-  margin[1] = margin[1] + 0.2f;
-  margin[3] = margin[3] + 0.2f;
+  reduced_x = 0.2f;
+  margin[1] = margin[1] + reduced_x;
+  margin[3] = margin[3] + reduced_x;
 
   ofWidth = ofGetWidth();
   ofHeight = ofGetHeight();
@@ -31,6 +35,10 @@ void testApp::setup() {
 
   // init with 0
   x = y = z = yChange = 0;
+  left_hand_x = left_hand_y = 0.0f;
+  hover_timer = 0;
+  hover_timer_delay = 20;
+
   // ..and NULL
   for (int i = 0; i < MAX_HANDS; i++) {
     hands[i] = NULL;
@@ -181,7 +189,7 @@ void testApp::update(){
     // hand 1 will be for height.. it's the other one
 
     // if we have both hands, sort them right to left
-      if (hands[0] && hands[1]) {
+    if (hands[0] && hands[1]) {
       // f@*# it assume there are exactly 2 at this point
       if (hands[0]->getPosition().x < hands[1]->getPosition().x) {
         // sort hands
@@ -214,15 +222,14 @@ void testApp::update(){
         yChange -= liveLower;  // center the range on 0 (so range is -live_margin .. +live_margin)
         y = min(max(y,0.0f),1.0f); // restrict to -1 and 1
         yChange = -yChange * MAX_CHANGE; // reverses y-axis and normalizes to MAX_CHANGE
-
-        // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
-        terrain->AdjustHeight(yChange, x, z, radius);
       } else {
         // dead zone .. no change (for feedback purposes)
         yChange = 0.0f;
       }
+      has_right = true;
     } else {
       x = z = y = 0.5f;
+      has_right = false;
     }
 
     // if we have a second hand ... 0_0 ... then that's just redundant
@@ -232,7 +239,47 @@ void testApp::update(){
       radius = (radius - margin[0]) / (yDimension - 0.2f); // adjust for margins (pad bottom)
       radius = 1.0f - radius; // invert
       radius = min(max(radius,0.0f),1.0f) * 0.8f; // scale to 0.8 as maximum     
-    }    
+      // record left hand position
+      left_hand_x = hands[1]->getPosition().x / ofWidth;
+      left_hand_x = (left_hand_x - margin[3] + reduced_x) / (xDimension + 2 * reduced_x); // un-adjust for margins
+      left_hand_x = min(max(left_hand_x,0.0f),1.0f); // restrict to 0 and 1
+      // using depth now. it's in mm
+      left_hand_y = hands[1]->getPosition().y / ofHeight;
+      left_hand_y = (left_hand_y - margin[0]) / yDimension; // adjust for margins
+      left_hand_y = min(max(left_hand_y,0.0f),1.0f); // restrict to 0 and 1
+
+      // terrain_modification_function_call_here(change_in_y, x, z, fancy_radius_thingey)
+      terrain->AdjustHeight(yChange, x, z, radius);
+      has_left = true;
+    } else {
+      has_left = false;
+      radius = 0.0f;
+    }
+
+    if (!radius) {
+      // UI stuff
+      // check what the point is over
+	    KT_PRESSED pressed = m_gui.GetAtPoint(0,ofVec2f(left_hand_x * ofWidth,left_hand_y * ofHeight));
+	    if(pressed != KT_NONE)
+	    {
+		    //printf("Point over button \n");
+        if(hover_timer++ == hover_timer_delay) {
+		      switch( pressed )
+		      {
+			      case KT_RESET:
+				      // reset terrain
+              ofLogNotice() << "RESET TERRAIN";
+			      break;
+            case KT_EXPORT:
+				      // export terrain
+              ofLogNotice() << "EXPORT TERRAIN";
+			      break;
+		      }
+        }
+	    } else {
+        hover_timer = 0;
+      }
+    }
 
     // the following should probably be my x, z and radius values instead?
     //float x = (float)mouseX / (float)windowWidth;
@@ -248,7 +295,7 @@ void testApp::draw(){
   //glPushMatrix();
   //ofSetColor(0, 0, 255);
   openNIDevice.drawDepth();
-  openNIDevice.drawHands();
+  //openNIDevice.drawHands();
   //glPopMatrix();
 
   ofMatrix4x4 matview;
@@ -269,18 +316,16 @@ void testApp::draw(){
   glUseProgram(0);
 
 	    
-	// GUI RELATED CRAP  
- // glMatrixMode(GL_PROJECTION);
- // glLoadIdentity();
+  //glMatrixMode(GL_PROJECTION);
+  //glLoadIdentity();
 	//glOrtho(0, ofGetWidth(), ofGetHeight(), 0, -ofGetHeight(), ofGetHeight());
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 
- //  //GUI CRAP
-	//  glPushMatrix();
-	//	 // m_gui.Draw();
-	//  glPopMatrix();
-  
+  //GUI CRAP
+	glPushMatrix();
+	  m_gui.Draw();
+	glPopMatrix();
 
   //* INPUT FEEDBACK CRAP
     //ofSetColor(255, 255, 255);
@@ -289,34 +334,47 @@ void testApp::draw(){
     //  openNIDevice.drawSkeleton(j);
     //}
 
-    //glPushMatrix();
-
-    //  ofSetColor(0,255,0);
-    //  // draw some info regarding frame counts etc
-    //  string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
-	   // verdana.drawString(msg, 10, openNIDevice.getNumDevices() * 480 - 10);
-
-    //  // height
-    //  ofSetColor(255,0,0);
-    //  msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
-	   // verdana.drawString(msg, 10, y * ofHeight - 2);
-    //  // position
-    //  msg = ofToString(x,2) + ":" + ofToString(z,2);
-	   // verdana.drawString(msg, x * ofWidth + 2, z * ofHeight - 2);
-    //  
-    //  // radius
-    //  ofCircle(40, 40, radius*30);
-    //  msg = ofToString(radius,2);
-	   // verdana.drawString(msg, 70, 35);
-    //  // dot(s)
-    //  ofCircle(x * ofWidth, z * ofHeight, 2);
-    //  ofCircle(8, y * ofHeight, 2);
-    //  // thresholds
-    //  ofSetColor(255,255,255);
-    //  ofRect(5, ofHeight * liveLower, 6, 1); // high threshold
-    //  ofRect(5, ofHeight * liveUpper, 6, 1); // low threshold
-    //
-    //glPopMatrix();
+    glPushMatrix();
+      ofSetColor(0,255,0);
+      // draw some info regarding frame counts etc
+      string msg = "Device FPS: " + ofToString(floor(openNIDevice.getFrameRate()));
+	    verdana.drawString(msg, 6, openNIDevice.getNumDevices() * 480 - 6);
+      // hand indicator
+      ofSetColor(255,0,0);
+      if(has_right) ofSetColor(255,127,39);
+      if(has_left) ofSetColor(0,255,0);
+      ofCircle(150,440,20);
+      // height
+      ofSetColor(255,0,0);
+      //msg = ofToString(y,2) + " [" + ofToString(yChange,2) + "]";
+      msg = ofToString(yChange,2);
+	    verdana.drawString(msg, 18, y * ofHeight + 2);
+      // position
+      msg = ofToString(x,2) + ":" + ofToString(z,2);
+	    verdana.drawString(msg, x * ofWidth + 8, z * ofHeight + 2);
+      // radius
+      ofCircle(40, 40, radius*30);
+      //msg = ofToString(radius,2);
+	    //verdana.drawString(msg, 70, 35);
+      // left hand
+      if(!radius && has_left) {
+        ofCircle(left_hand_x * ofWidth, left_hand_y * ofHeight, 6);
+        // hover indicator
+        if(hover_timer) {
+          ofSetColor(0,0,255);
+          if(hover_timer >= hover_timer_delay) ofSetColor(255,0,255);
+          ofCircle(150,440,min(20,20 * hover_timer/hover_timer_delay));
+        }
+      }
+      // dot(s)
+      ofSetColor(255,0,0);
+      ofCircle(x * ofWidth, z * ofHeight, 3); // redundant
+      ofCircle(8, y * ofHeight, 3);
+      // thresholds
+      ofSetColor(255,255,255);
+      ofRect(5, ofHeight * liveLower, 6, 2); // high threshold
+      ofRect(5, ofHeight * liveUpper, 6, 2); // low threshold 
+    glPopMatrix();
   //*/
 }
 
@@ -361,11 +419,11 @@ void testApp::mouseMoved(int x, int y ){
 		printf("Point over button \n");
 		switch( pressed )
 		{
-			case KT_RAISE:
-				// raise terrain
+			case KT_RESET:
+				// reset terrain
 			break;
-			case KT_LOWER:
-				// lower terrain
+      case KT_EXPORT:
+				// reset terrain
 			break;
 		}
 	}

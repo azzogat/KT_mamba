@@ -3,14 +3,13 @@
 KTGui::KTGui()
 {	
 	// raise & lower arrow
-	SimpleButton _raise("arrow.jpg", ofVec2f(30.0f,30.0f), ofVec2f(120.0f,120.0f));
-	_raise.m_type = KT_RAISE;
-	SimpleButton _lower("arrow.jpg", ofVec2f(30.0f,_raise.m_boundingBox.height+_raise.m_boundingBox.x+30.0f), ofVec2f(120.0f,120.0f));
-	_lower.m_type = KT_LOWER;
-	_lower.m_texture.rotate90(2);
+  SimpleButton _reset("reset.jpg", ofVec2f(20.0f,420.0f), ofVec2f(45.0f,40.0f));
+	_reset.m_type = KT_RESET;
+  SimpleButton _export("save.jpg", ofVec2f(75.0f,420.0f), ofVec2f(45.0f,40.0f));
+	_export.m_type = KT_EXPORT;
 
-	m_buttons.push_back(_raise);
-	m_buttons.push_back(_lower);
+	m_buttons.push_back(_reset);
+  m_buttons.push_back(_export);
 }
 
 void KTGui::Draw()

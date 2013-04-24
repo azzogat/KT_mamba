@@ -43,8 +43,10 @@ private:
     ofxOpenNIDepthThreshold depthThreshold;
     
     float margin[4]; // used to correct for aparent dead zone on edges of sensor
-    float x, y, z, radius, yChange, deadZone, liveUpper, liveLower, xDimension, yDimension, ofHeight, ofWidth;
-    int MAX_HANDS, MAX_CHANGE;
+    float x, y, z, radius, yChange, deadZone, liveUpper, liveLower, reduced_x;
+    float xDimension, yDimension, ofHeight, ofWidth, left_hand_x, left_hand_y;
+    int MAX_HANDS, MAX_CHANGE, hover_timer, hover_timer_delay;
+    bool has_left, has_right;
 };
 
 #endif
