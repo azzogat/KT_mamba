@@ -325,7 +325,7 @@ void Terrain::AdjustHeight( float diff,float x,float z,float radius ) {
 
 void Terrain::HighLightPosition( float x,float z,float radius ) {
 
-  if (x != lastx && z != lastz) {
+  if (x != lastx || z != lastz) {
 	  int centerX = x*(m_heightField.xDim-1);
 	  int centerZ = z*(m_heightField.zDim-1);
 	

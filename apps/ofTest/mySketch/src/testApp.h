@@ -4,9 +4,15 @@
 #include "ofxOpenNI.h"
 #include "ofMain.h"
 #include "Terrain.h"
+#include "HandCoords.h"
 #include "KTGui.h"
 
- #define MAX_DEVICES 2
+#define MAX_DEVICES 2
+
+enum Hand {
+  R, // Right
+  L  // Left
+};
 
 class testApp : public ofBaseApp{
 
@@ -38,15 +44,15 @@ private:
     int windowHeight;
     unsigned int program_id;
 
-    ofxOpenNIHand * hands[2];
+    ofxOpenNIHand * tracked_hands[2];
+    HandCoords hand[2];
 
     ofxOpenNIDepthThreshold depthThreshold;
     
     float margin[4]; // used to correct for aparent dead zone on edges of sensor
-    float x, y, z, radius, yChange, deadZone, liveUpper, liveLower, reduced_x;
-    float xDimension, yDimension, ofHeight, ofWidth, left_hand_x, left_hand_y;
-    int MAX_HANDS, MAX_CHANGE, hover_timer, hover_timer_delay;
-    bool has_left, has_right;
+    float x, y, z, yChange, radius, maxRadius, deadZone, liveUpper, liveLower, maxChange, uiZone;
+    int maxHands, hoverTimer, hoverTimerDelay;
+    bool hasLeft, hasRight;
 };
 
 #endif

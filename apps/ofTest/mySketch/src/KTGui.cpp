@@ -3,9 +3,9 @@
 KTGui::KTGui()
 {	
 	// raise & lower arrow
-  SimpleButton _reset("reset.jpg", ofVec2f(20.0f,ofGetHeight()-60), ofVec2f(45.0f,40.0f));
+  SimpleButton _reset("reset.jpg", ofVec2f(75.0f,ofGetHeight()-60), ofVec2f(45.0f,40.0f));
 	_reset.m_type = KT_RESET;
-  SimpleButton _export("save.jpg", ofVec2f(75.0f,ofGetHeight()-60), ofVec2f(45.0f,40.0f));
+  SimpleButton _export("save.jpg", ofVec2f(130.0f,ofGetHeight()-60), ofVec2f(45.0f,40.0f));
 	_export.m_type = KT_EXPORT;
 
 	m_buttons.push_back(_reset);
